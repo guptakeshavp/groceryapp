@@ -1,6 +1,7 @@
 import type { PlatformAdapter } from '../adapters/adapter.ts';
 import { formatQuantity, parsePackSize } from '../domain/size.ts';
 import { AdapterError, APP_NAMES, type AppId, type BasketLine, type Item, type Listing } from '../domain/types.ts';
+import type { PriceHistory } from './history.ts';
 import { fillQuantity, type FillResult } from './pack-filler.ts';
 
 /** Within this many rupees the ignored handling fees (~₹4–12) could swing it, so call it a tie. */
@@ -10,6 +11,9 @@ export interface CompareInput {
   basket: BasketLine[];
   catalogue: Map<string, Item>;
   adapters: PlatformAdapter[];
+  /** When given, every price seen is recorded (basket runs feed staple history for free). */
+  history?: PriceHistory;
+  now?: Date;
 }
 
 export interface LineResult {
@@ -82,6 +86,7 @@ async function checkOneApp(adapter: PlatformAdapter, input: CompareInput, worthK
     const lines: LineResult[] = input.basket.map((line) => {
       const item = mustGet(input.catalogue, line.itemId);
       const family = (item.listings[app] ?? []).map((id) => current.get(id)).filter((l): l is Listing => !!l);
+      input.history?.record(item.id, app, family, input.now ?? new Date());
       const fill = fillQuantity(family, line.quantity, item.pinnedContainer);
       noteCaveats(APP_NAMES[app], item, line, family, fill, worthKnowing);
       return { itemId: line.itemId, fill };
