@@ -50,6 +50,16 @@ export class GroceryApp {
     this.sources = opts.sources ?? defaultSources(dataDir);
   }
 
+  /** Live apps go through the governor; recorded replays touch no site, so they aren't paced. */
+  private governed(s: AppSource): PlatformAdapter {
+    return s.source === 'live' ? this.governor.wrap(s.adapter, 'basket') : s.adapter;
+  }
+
+  /** Apps this tool currently checks. */
+  apps(): AppId[] {
+    return this.sources.map((s) => s.adapter.app);
+  }
+
   items(): Item[] {
     return this.catalogueStore.read().items;
   }
@@ -63,7 +73,7 @@ export class GroceryApp {
     const comparison = await compareBasket({
       basket,
       catalogue: new Map(items.map((i) => [i.id, i])),
-      adapters: this.sources.map((s) => this.governor.wrap(s.adapter, 'basket')),
+      adapters: this.sources.map((s) => this.governed(s)),
       history: this.history,
       now: this.clock.now(),
     });
@@ -100,7 +110,7 @@ export class GroceryApp {
     await Promise.all(
       this.sources.map(async (s) => {
         try {
-          out[s.adapter.app] = { listings: (await this.governor.wrap(s.adapter, 'basket').search(query)).slice(0, 8) };
+          out[s.adapter.app] = { listings: (await this.governed(s).search(query)).slice(0, 8) };
         } catch (e) {
           out[s.adapter.app] = { listings: [], error: e instanceof Error ? e.message : String(e) };
         }

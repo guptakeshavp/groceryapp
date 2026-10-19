@@ -27,7 +27,7 @@ const server = createServer(async (req, res) => {
       return res.end(page());
     }
     if (req.method === 'GET' && url.pathname === '/api/state') {
-      return send(res, 200, { deals: app.deals(), notices: await app.notices(), items: app.items(), appNames: APP_NAMES });
+      return send(res, 200, { deals: app.deals(), notices: await app.notices(), items: app.items(), appNames: APP_NAMES, apps: app.apps() });
     }
     if (req.method === 'POST' && url.pathname === '/api/compare') {
       const { text } = await body(req);

@@ -79,7 +79,7 @@
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
 const rupee = (n) => '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 2 });
-let state = { items: [], appNames: {} };
+let state = { items: [], appNames: {}, apps: [] };
 let editing = null;
 
 async function api(path, body) {
@@ -98,7 +98,7 @@ async function loadState() {
 }
 
 function renderNeeds(newLines) {
-  const apps = Object.keys(state.appNames);
+  const apps = state.apps;
   const unmatched = state.items.map((i) => ({ i, missing: apps.filter((a) => !i.listings[a]) })).filter((x) => x.missing.length);
   if (!newLines.length && !unmatched.length) { $('needs').hidden = true; return; }
   $('needs').hidden = false;
