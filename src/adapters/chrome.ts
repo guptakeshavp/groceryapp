@@ -3,7 +3,7 @@ import { type BrowserContext, chromium } from 'playwright-core';
 import type { AuthStatus, Listing } from '../domain/types.ts';
 import { AdapterError } from '../domain/types.ts';
 import type { PlatformAdapter } from './adapter.ts';
-import { looksBlocked, parseBigBasketText, parseBlinkitText } from './page-parsers.ts';
+import { blinkitIdMatches, looksBlocked, parseBigBasketText, parseBlinkitCards } from './page-parsers.ts';
 
 export const profileDir = (dataDir = 'data') => join(dataDir, 'chrome-profile');
 
@@ -36,6 +36,19 @@ export class ChromeSession {
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: timeoutMs });
       await page.waitForFunction((re) => new RegExp(re, 'i').test(document.body?.innerText ?? ''), ready.source, { timeout: timeoutMs }).catch(() => undefined);
       return await page.evaluate(() => document.body?.innerText ?? '');
+    } finally {
+      await page.close();
+    }
+  }
+
+  /** Load a page, wait for `ready`, then run `script` in it. */
+  async pageEval<T>(url: string, ready: RegExp, script: () => T, timeoutMs = 15_000): Promise<{ text: string; value: T }> {
+    const context = await this.open();
+    const page = await context.newPage();
+    try {
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: timeoutMs });
+      await page.waitForFunction((re) => new RegExp(re, 'i').test(document.body?.innerText ?? ''), ready.source, { timeout: timeoutMs }).catch(() => undefined);
+      return { text: await page.evaluate(() => document.body?.innerText ?? ''), value: await page.evaluate(script) };
     } finally {
       await page.close();
     }
@@ -83,13 +96,35 @@ export class BlinkitAdapter extends ChromeSiteAdapter {
   protected url(q: string) {
     return `https://blinkit.com/s/?q=${encodeURIComponent(q)}`;
   }
-  protected parse(text: string) {
-    return parseBlinkitText(text);
+  protected parse(): Listing[] {
+    return []; // search() reads cards from the DOM instead of the page text
   }
   protected checkLocation(text: string) {
     if (/detect my location|select (your )?location|enter your delivery location/i.test(text) && !/\bMINS?\b/.test(text)) {
       throw new AdapterError('error', 'home address not set on Blinkit in the automated Chrome — run npm run chrome-setup');
     }
+  }
+
+  async search(query: string): Promise<Listing[]> {
+    const { text, value: cards } = await this.chrome.pageEval(this.url(query), /\bMINS?\b|captcha|access denied/, () => {
+      const related = [...document.querySelectorAll('div, h2, h3, span')].find((e) => /^Showing related products/.test((e as HTMLElement).innerText ?? ''));
+      return [...document.querySelectorAll('[role="button"][id]')]
+        .filter((e) => /\bMINS?\b/.test((e as HTMLElement).innerText ?? '') && (e as HTMLElement).innerText.length < 400)
+        .filter((e) => !related || !(related.compareDocumentPosition(e) & Node.DOCUMENT_POSITION_FOLLOWING))
+        .map((e) => ({ id: e.id, text: (e as HTMLElement).innerText }));
+    });
+    this.checkLocation(text);
+    const listings = parseBlinkitCards(cards);
+    if (listings.length === 0) {
+      const kind = looksBlocked(text);
+      if (kind) throw new AdapterError(kind, kind === 'blocked' ? 'challenge page' : 'empty results page');
+    }
+    return listings;
+  }
+
+  async getListings(listingIds: string[], query: string): Promise<Listing[]> {
+    const wanted = new Set(listingIds);
+    return (await this.search(query)).filter((l) => blinkitIdMatches(l, wanted));
   }
 }
 

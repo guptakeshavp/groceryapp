@@ -33,3 +33,12 @@ test('detects challenge pages and blank results', () => {
   assert.equal(looksBlocked('!\np\nr\nMy Cart'), 'blank');
   assert.equal(looksBlocked(page('blinkit-amul-butter-2026-10-19.txt')), undefined);
 });
+
+test('Blinkit cards: stable product ids, and confirmations made under old name-based ids still match', async () => {
+  const { parseBlinkitCards, blinkitIdMatches } = await import('../src/adapters/page-parsers.ts');
+  const [l] = parseBlinkitCards([{ id: '159', text: '16 MINS\nAmul Salted Butter\n100 g\n₹63\nADD' }]);
+  assert.equal(l.listingId, 'blinkit:159');
+  assert.ok(blinkitIdMatches(l, new Set(['blinkit:amul-salted-butter-100-g'])));
+  assert.ok(blinkitIdMatches(l, new Set(['blinkit:159'])));
+  assert.ok(!blinkitIdMatches(l, new Set(['blinkit:999'])));
+});

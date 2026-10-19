@@ -37,6 +37,20 @@ export function parseBlinkitText(text: string): Listing[] {
 }
 
 /**
+ * Blinkit cards read from the DOM: each search result is a [role=button] element whose id is Blinkit's
+ * product id — stable across renames, unlike the name. Cards after "Showing related products" are excluded
+ * by the page script.
+ */
+export function parseBlinkitCards(cards: { id: string; text: string }[]): Listing[] {
+  return cards.flatMap(({ id, text }) => parseBlinkitText(text).slice(0, 1).map((l) => ({ ...l, listingId: `blinkit:${id}` })));
+}
+
+/** Ids confirmed before Blinkit's product ids were used were name+size slugs; keep honouring them. */
+export function blinkitIdMatches(l: Listing, wanted: ReadonlySet<string>): boolean {
+  return wanted.has(l.listingId) || wanted.has(listingId('blinkit', `${l.name} ${l.size}`));
+}
+
+/**
  * BigBasket search page text. Each card:
  *   [Out Of Stock] · [₹n OFF | n% OFF] · "10 MINS" · brand · name · [rating] · [N Ratings] · size ·
  *   ₹price · [₹mrp] · [Har Din Sasta!] · "Add" | "Notify Me"
