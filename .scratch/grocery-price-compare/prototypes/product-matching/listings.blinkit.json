@@ -1,0 +1,300 @@
+{
+ "_note": "PROTOTYPE DATA - real Blinkit web search results read via Keshav's Chrome, home store Ahmedabad, 2026-10-19. Subset of each results page (relevant + tricky near-misses). price/mrp in INR.",
+ "platform": "blinkit",
+ "searches": {
+  "ghee": [
+   {
+    "name": "Amul Cow Ghee (Pouch) (Gaay Nu Ghee)",
+    "size": "1 ltr",
+    "price": 703,
+    "mrp": 735
+   },
+   {
+    "name": "Amul Cow Ghee (Tin) (Gaay Nu Ghee)",
+    "size": "1 ltr",
+    "price": 728,
+    "mrp": 745
+   },
+   {
+    "name": "Gowardhan Premium Cow Ghee (Gaay Nu Ghee)",
+    "size": "1 ltr",
+    "price": 814,
+    "mrp": 890
+   },
+   {
+    "name": "Gowardhan Premium Cow Ghee (Gaay Nu Ghee)",
+    "size": "500 ml",
+    "price": 447,
+    "mrp": 470
+   },
+   {
+    "name": "Gowardhan Cow Ghee (Gaay Nu Ghee)",
+    "size": "1 ltr",
+    "price": 811,
+    "mrp": 870
+   },
+   {
+    "name": "Patanjali Cow Ghee (Gaay Nu Ghee)",
+    "size": "500 ml",
+    "price": 430,
+    "mrp": null
+   },
+   {
+    "name": "Patanjali Cow Ghee (1 l) (Gaay Nu Ghee)",
+    "size": "1 ltr",
+    "price": 810,
+    "mrp": null
+   },
+   {
+    "name": "Country Delight Desi Danedar Cow Ghee",
+    "size": "700 ml",
+    "price": 639,
+    "mrp": 789
+   },
+   {
+    "name": "Barosi Desi Cow A2 Ghee (500 ml)",
+    "size": "500 ml",
+    "price": 854,
+    "mrp": 1080
+   },
+   {
+    "name": "Paras Desi Ghee",
+    "size": "900 ml",
+    "price": 641,
+    "mrp": 720
+   },
+   {
+    "name": "Aabad Cow Ghee (Gaay Nu Ghee)",
+    "size": "1 ltr",
+    "price": 715,
+    "mrp": 780
+   },
+   {
+    "name": "Darshana Pooja Ghee (Non-Edible) by Shubhkart",
+    "size": "500 ml",
+    "price": 180,
+    "mrp": 195
+   },
+   {
+    "name": "Pooja Ghee (Non-Edible) by Hari Darshan",
+    "size": "200 g",
+    "price": 83,
+    "mrp": 96
+   }
+  ],
+  "amul butter": [
+   {
+    "name": "Amul Salted Butter",
+    "size": "100 g",
+    "price": 63,
+    "mrp": null
+   },
+   {
+    "name": "Amul Salted Butter (Chiplets)",
+    "size": "100 g",
+    "price": 80,
+    "mrp": null
+   },
+   {
+    "name": "Amul Unsalted Butter",
+    "size": "100 g",
+    "price": 65,
+    "mrp": null
+   },
+   {
+    "name": "Amul Lite Milk Fat Spread",
+    "size": "100 g",
+    "price": 50,
+    "mrp": null
+   },
+   {
+    "name": "Amul Fresh Butter Cookies",
+    "size": "200 g",
+    "price": 85,
+    "mrp": null
+   },
+   {
+    "name": "Mother Dairy Salted Butter (500 g)",
+    "size": "500 g",
+    "price": 310,
+    "mrp": null
+   },
+   {
+    "name": "Amul Masti Spiced Salted Buttermilk",
+    "size": "200 ml",
+    "price": 15,
+    "mrp": null
+   }
+  ],
+  "aashirvaad atta": [
+   {
+    "name": "Aashirvaad Shudh Chakki Atta (100% Atta, 0% Maida, 5 Kg) (Lott)",
+    "size": "5 kg",
+    "price": 253,
+    "mrp": 291
+   },
+   {
+    "name": "Aashirvaad Shudh Chakki Atta (100% Atta, 0% Maida) (Lott)",
+    "size": "10 kg",
+    "price": 445,
+    "mrp": 519
+   },
+   {
+    "name": "Aashirvaad High Fibre Atta with Multigrains - 5 kg (Multigrain Lott)",
+    "size": "5 kg",
+    "price": 324,
+    "mrp": 397
+   },
+   {
+    "name": "Aashirvaad Select 100% MP Sharbati Atta (Sharbati Lott)",
+    "size": "5 kg",
+    "price": 317,
+    "mrp": 384
+   },
+   {
+    "name": "Aashirvaad Organic Atta",
+    "size": "1 kg",
+    "price": 74,
+    "mrp": 86
+   },
+   {
+    "name": "Fortune Fresh (100% Atta, 0% Maida) Chakki Atta (Lott)",
+    "size": "5 kg",
+    "price": 229,
+    "mrp": 277
+   }
+  ],
+  "maggi": [
+   {
+    "name": "Maggi Masala - 2 Minutes Instant Noodles Made With Quality Spices",
+    "size": "280 g",
+    "price": 60,
+    "mrp": null
+   },
+   {
+    "name": "Maggi 2 Minutes Instant Noodles Made With Quality Spices",
+    "size": "420 g",
+    "price": 80,
+    "mrp": 90
+   },
+   {
+    "name": "Maggi 2 - Minute Instant Noodles Made With Quality Spices",
+    "size": "840 g",
+    "price": 162,
+    "mrp": 180
+   },
+   {
+    "name": "Maggi 2-Minute Special Masala Instant Noodles",
+    "size": "4 x 70 g",
+    "price": 88,
+    "mrp": 100
+   },
+   {
+    "name": "Maggi Double Masala Instant Noodles",
+    "size": "95 g",
+    "price": 20,
+    "mrp": null
+   },
+   {
+    "name": "Maggi Masala Cuppa Noodles",
+    "size": "70.5 g",
+    "price": 50,
+    "mrp": 55
+   },
+   {
+    "name": "Maggi Masala-ae-Magic Sabzi Masala (Sabajhi Masala)",
+    "size": "72 g",
+    "price": 55,
+    "mrp": 60
+   },
+   {
+    "name": "Yippee Magic Masala Instant Noodles with Added Veggies",
+    "size": "435.6 g",
+    "price": 69,
+    "mrp": 90
+   }
+  ],
+  "surf excel matic": [
+   {
+    "name": "Surf Excel Matic Top Load Liquid Detergent",
+    "size": "1 kg",
+    "price": 159,
+    "mrp": null
+   },
+   {
+    "name": "Surf Excel Matic Top Load Liquid Detergent",
+    "size": "3 kg",
+    "price": 488,
+    "mrp": 525
+   },
+   {
+    "name": "Surf Excel Matic Top Load Liquid Detergent",
+    "size": "5 kg",
+    "price": 639,
+    "mrp": 810
+   },
+   {
+    "name": "Surf Excel Matic Front Load Liquid Detergent (1 ltr)",
+    "size": "1 ltr",
+    "price": 169,
+    "mrp": null
+   },
+   {
+    "name": "Surf Excel Matic Front Load Liquid Detergent",
+    "size": "3 kg",
+    "price": 583,
+    "mrp": 620
+   },
+   {
+    "name": "Surf Excel Top Load Liquid Detergent",
+    "size": "1 ltr",
+    "price": 235,
+    "mrp": null
+   },
+   {
+    "name": "Surf Excel Top Load Liquid Detergent",
+    "size": "2 kg",
+    "price": 351,
+    "mrp": 370
+   },
+   {
+    "name": "Surf Excel Matic Express Clean & Care Liquid Detergent",
+    "size": "2 ltr",
+    "price": 359,
+    "mrp": 448
+   }
+  ],
+  "onion": [
+   {
+    "name": "Onion (Dungdi)",
+    "size": "1 kg",
+    "price": 66,
+    "mrp": 75
+   },
+   {
+    "name": "Organically Grown - Onion (Dungdi)",
+    "size": "500 g",
+    "price": 56,
+    "mrp": 66
+   },
+   {
+    "name": "Spring Onion (Lili Dungdi)",
+    "size": "150 g",
+    "price": 31,
+    "mrp": 40
+   },
+   {
+    "name": "Sambhar Onion (Sambhar Dungdi)",
+    "size": "250 g",
+    "price": 24,
+    "mrp": 31
+   }
+  ]
+ },
+ "_observations": [
+  "No Amul butter 500 g listing on Blinkit for this store; only 100 g packs.",
+  "Gujarati transliterations in names: 'Gaay Nu Ghee', 'Lott'.",
+  "Pack sizes mix ltr/ml/kg/g for the same kind of product (ghee 1 ltr vs 900 g elsewhere); '4 x 70 g' multipacks.",
+  "'onion' rendered blank after ~6 quick searches; a retry ~10 min later worked (18-min delivery for produce vs 8-11 for packaged)."
+ ]
+}

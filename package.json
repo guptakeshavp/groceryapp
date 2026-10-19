@@ -1,0 +1,17 @@
+{
+  "name": "grocery-price-compare",
+  "private": true,
+  "type": "module",
+  "description": "Household grocery price comparison across Indian quick-commerce apps. Spec: .scratch/grocery-price-compare/spec.md",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\"",
+    "typecheck": "tsc -p ."
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "typescript": "5.9.3"
+  }
+}

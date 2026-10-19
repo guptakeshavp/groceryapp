@@ -1,0 +1,337 @@
+{
+ "_note": "PROTOTYPE DATA - real BigBasket (bbnow) web search results via Keshav's logged-in Chrome, Ahmedabad, 2026-10-19. BigBasket shows brand and product name as separate fields.",
+ "platform": "bigbasket",
+ "searches": {
+  "ghee": [
+   {
+    "name": "Amul Cow Ghee",
+    "brand": "Amul",
+    "size": "500 ml - Pouch",
+    "price": 348.25,
+    "mrp": 350,
+    "in_stock": false
+   },
+   {
+    "name": "Amul Cow Ghee",
+    "brand": "Amul",
+    "size": "1 L - Pouch",
+    "price": 660,
+    "mrp": 695,
+    "in_stock": false
+   },
+   {
+    "name": "Amul Cow Ghee",
+    "brand": "Amul",
+    "size": "500 ml - Jar",
+    "price": 349,
+    "mrp": 355,
+    "in_stock": false
+   },
+   {
+    "name": "Amul Cow Ghee",
+    "brand": "Amul",
+    "size": "1 L - Tin",
+    "price": 692,
+    "mrp": 705,
+    "in_stock": true
+   },
+   {
+    "name": "Amul Pure Ghee",
+    "brand": "Amul",
+    "size": "1 L - Pouch",
+    "price": 627,
+    "mrp": 640,
+    "in_stock": true
+   },
+   {
+    "name": "Amul Pure Ghee",
+    "brand": "Amul",
+    "size": "500 ml - Pouch",
+    "price": 323.38,
+    "mrp": 325,
+    "in_stock": true
+   },
+   {
+    "name": "Amul Amul Pure Ghee 1 L",
+    "brand": "Amul",
+    "size": "1 L - Tin",
+    "price": 642,
+    "mrp": 650,
+    "in_stock": true
+   },
+   {
+    "name": "Gowardhan Ghee",
+    "brand": "Gowardhan",
+    "size": "1 L - Bottle",
+    "price": 812,
+    "mrp": 890,
+    "in_stock": true
+   },
+   {
+    "name": "Gowardhan Premium Ghee",
+    "brand": "Gowardhan",
+    "size": "500 ml - Pouch",
+    "price": 416,
+    "mrp": 455,
+    "in_stock": true
+   },
+   {
+    "name": "Patanjali Cow's Ghee",
+    "brand": "Patanjali",
+    "size": "1L - Carton",
+    "price": 784,
+    "mrp": 810,
+    "in_stock": true
+   },
+   {
+    "name": "Barosi A2 Desi Cow Ghee",
+    "brand": "Barosi",
+    "size": "1 L",
+    "price": 1611,
+    "mrp": 2040,
+    "in_stock": true
+   },
+   {
+    "name": "Country Delight Desi Danedar Ghee",
+    "brand": "Country Delight",
+    "size": "700 ml - Jar",
+    "price": 617,
+    "mrp": 789,
+    "in_stock": true
+   },
+   {
+    "name": "Sankalp by Om Bhakti Puja Ghee",
+    "brand": "Sankalp by Om Bhakti",
+    "size": "500 ml",
+    "price": 175.12,
+    "mrp": 199,
+    "in_stock": true
+   }
+  ],
+  "amul butter": [
+   {
+    "name": "Amul Pasteurised Butter",
+    "brand": "Amul",
+    "size": "100 g - Carton",
+    "price": 63,
+    "mrp": null,
+    "in_stock": true
+   },
+   {
+    "name": "Amul Pasteurised Butter",
+    "brand": "Amul",
+    "size": "200 g - Tub",
+    "price": 130,
+    "mrp": null,
+    "in_stock": true
+   },
+   {
+    "name": "Amul Unsalted Butter",
+    "brand": "Amul",
+    "size": "500 g - Carton",
+    "price": 320,
+    "mrp": null,
+    "in_stock": true
+   },
+   {
+    "name": "Amul Pasturised Butter Chiplet",
+    "brand": "Amul",
+    "size": "50 pcs - Carton",
+    "price": 635,
+    "mrp": null,
+    "in_stock": true
+   },
+   {
+    "name": "Amul Lite Milk Fat Bread Spread",
+    "brand": "Amul",
+    "size": "200 g - Tub",
+    "price": 105,
+    "mrp": null,
+    "in_stock": true
+   },
+   {
+    "name": "Milky Mist Cooking Butter - Unsalted",
+    "brand": "Milky Mist",
+    "size": "500 g - Carton",
+    "price": 389,
+    "mrp": 400,
+    "in_stock": true
+   },
+   {
+    "name": "Amul Butter Cookies",
+    "brand": "Amul",
+    "size": "200 g",
+    "price": 85,
+    "mrp": null,
+    "in_stock": true
+   }
+  ],
+  "aashirvaad atta": [
+   {
+    "name": "Aashirvaad Shudh Chakki Atta/Ghau No Lot",
+    "brand": "Aashirvaad",
+    "size": "5 kg",
+    "price": 247.5,
+    "mrp": 291,
+    "in_stock": true
+   },
+   {
+    "name": "Aashirvaad Shudh Chakki Atta/Ghau No Lot",
+    "brand": "Aashirvaad",
+    "size": "10 kg",
+    "price": 442,
+    "mrp": 519,
+    "in_stock": true
+   },
+   {
+    "name": "Aashirvaad Multigrains Atta/Ghau No Lot",
+    "brand": "Aashirvaad",
+    "size": "5 kg",
+    "price": 299,
+    "mrp": 397,
+    "in_stock": true
+   },
+   {
+    "name": "Aashirvaad Select MP Sharbati Atta",
+    "brand": "Aashirvaad",
+    "size": "5 kg",
+    "price": 299,
+    "mrp": 384,
+    "in_stock": true
+   }
+  ],
+  "maggi": [
+   {
+    "name": "Maggi 2-Minute Instant Masala Noodles",
+    "brand": "Maggi",
+    "size": "2x420 g - (Multipack)",
+    "price": 158,
+    "mrp": 180,
+    "in_stock": true
+   },
+   {
+    "name": "Maggi 2-Minute Special Masala Instant Noodles",
+    "brand": "Maggi",
+    "size": "3x70 g - (Multipack)",
+    "price": 60,
+    "mrp": null,
+    "in_stock": true
+   },
+   {
+    "name": "Maggi Double Masala Instant Noodles",
+    "brand": "Maggi",
+    "size": "4x95 g - (Multipack)",
+    "price": 75,
+    "mrp": 80,
+    "in_stock": true
+   },
+   {
+    "name": "Maggi Nutri-Licious Veg Atta Instant Noodles",
+    "brand": "Maggi",
+    "size": "290 g",
+    "price": 99,
+    "mrp": 108,
+    "in_stock": true
+   },
+   {
+    "name": "Sunfeast YiPPee! Magic Masala Instant Noodles",
+    "brand": "Sunfeast",
+    "size": "272 g",
+    "price": 47.5,
+    "mrp": 60,
+    "in_stock": true
+   }
+  ],
+  "surf excel matic": [
+   {
+    "name": "Surf Excel Matic Liquid Detergent For Top Load",
+    "brand": "Surf Excel",
+    "size": "5 kg",
+    "price": 652.5,
+    "mrp": 780,
+    "in_stock": true
+   },
+   {
+    "name": "Surf Excel Matic Front Load Liquid Detergent",
+    "brand": "Surf Excel",
+    "size": "5 kg",
+    "price": 779,
+    "mrp": 932,
+    "in_stock": true
+   },
+   {
+    "name": "Surf Excel Matic Front Load Liquid Detergent",
+    "brand": "Surf Excel",
+    "size": "1 kg - Pouch",
+    "price": 169,
+    "mrp": null,
+    "in_stock": true
+   },
+   {
+    "name": "Surf Excel Matic Express Clean & Care Liquid Detergent",
+    "brand": "Surf Excel",
+    "size": "2 L",
+    "price": 368,
+    "mrp": 448,
+    "in_stock": true
+   },
+   {
+    "name": "Surf Excel Matic Express Clean & Care Liquid Detergent",
+    "brand": "Surf Excel",
+    "size": "830 ml",
+    "price": 215,
+    "mrp": 235,
+    "in_stock": true
+   },
+   {
+    "name": "Surf Excel Matic Top Load Detergent Powder",
+    "brand": "Surf Excel",
+    "size": "6 kg",
+    "price": 1285,
+    "mrp": 1375,
+    "in_stock": true
+   }
+  ],
+  "onion": [
+   {
+    "name": "fresho! Onion",
+    "brand": "fresho!",
+    "size": "1 kg",
+    "price": 66,
+    "mrp": 88.75,
+    "in_stock": true
+   },
+   {
+    "name": "fresho! Onion - Organically Grown",
+    "brand": "fresho!",
+    "size": "1 kg",
+    "price": 68,
+    "mrp": 97.5,
+    "in_stock": true
+   },
+   {
+    "name": "fresho! Onion - Sambhar",
+    "brand": "fresho!",
+    "size": "250 g",
+    "price": 34,
+    "mrp": 42.5,
+    "in_stock": true
+   },
+   {
+    "name": "fresho! Spring Onion",
+    "brand": "fresho!",
+    "size": "250 g",
+    "price": 32,
+    "mrp": 40,
+    "in_stock": true
+   }
+  ]
+ },
+ "_observations": [
+  "All Amul Cow Ghee pouches/jars out of stock at this store (out-of-stock flag attribution in scrape is approximate).",
+  "'Cow Ghee' and 'Pure Ghee' are different Amul products — a matching trap.",
+  "Spelling variants: 'Pasteurised'/'Pasturised'; multipacks written '2x420 g - (Multipack)'.",
+  "Search for 'amul ghee' returned nothing; 'amul cow ghee' worked — search phrasing matters.",
+  "No Amul salted butter 500 g on either Blinkit or BigBasket at this location."
+ ]
+}

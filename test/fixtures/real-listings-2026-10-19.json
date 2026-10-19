@@ -1,0 +1,787 @@
+{
+ "_note": "Real listings captured 2026-10-19 via Keshav's Chrome at the Ahmedabad (380015) stores, from the product-matching prototype. Do not edit prices; add new captures as new files.",
+ "listings": [
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:amul-cow-ghee-pouch-gaay-nu-ghee-1-ltr",
+   "name": "Amul Cow Ghee (Pouch) (Gaay Nu Ghee)",
+   "size": "1 ltr",
+   "price": 703,
+   "inStock": true,
+   "mrp": 735
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:amul-cow-ghee-tin-gaay-nu-ghee-1-ltr",
+   "name": "Amul Cow Ghee (Tin) (Gaay Nu Ghee)",
+   "size": "1 ltr",
+   "price": 728,
+   "inStock": true,
+   "mrp": 745
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:gowardhan-premium-cow-ghee-gaay-nu-ghee-1-ltr",
+   "name": "Gowardhan Premium Cow Ghee (Gaay Nu Ghee)",
+   "size": "1 ltr",
+   "price": 814,
+   "inStock": true,
+   "mrp": 890
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:gowardhan-premium-cow-ghee-gaay-nu-ghee-500-ml",
+   "name": "Gowardhan Premium Cow Ghee (Gaay Nu Ghee)",
+   "size": "500 ml",
+   "price": 447,
+   "inStock": true,
+   "mrp": 470
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:gowardhan-cow-ghee-gaay-nu-ghee-1-ltr",
+   "name": "Gowardhan Cow Ghee (Gaay Nu Ghee)",
+   "size": "1 ltr",
+   "price": 811,
+   "inStock": true,
+   "mrp": 870
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:patanjali-cow-ghee-gaay-nu-ghee-500-ml",
+   "name": "Patanjali Cow Ghee (Gaay Nu Ghee)",
+   "size": "500 ml",
+   "price": 430,
+   "inStock": true
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:patanjali-cow-ghee-1-l-gaay-nu-ghee-1-ltr",
+   "name": "Patanjali Cow Ghee (1 l) (Gaay Nu Ghee)",
+   "size": "1 ltr",
+   "price": 810,
+   "inStock": true
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:country-delight-desi-danedar-cow-ghee-700-ml",
+   "name": "Country Delight Desi Danedar Cow Ghee",
+   "size": "700 ml",
+   "price": 639,
+   "inStock": true,
+   "mrp": 789
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:barosi-desi-cow-a2-ghee-500-ml-500-ml",
+   "name": "Barosi Desi Cow A2 Ghee (500 ml)",
+   "size": "500 ml",
+   "price": 854,
+   "inStock": true,
+   "mrp": 1080
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:paras-desi-ghee-900-ml",
+   "name": "Paras Desi Ghee",
+   "size": "900 ml",
+   "price": 641,
+   "inStock": true,
+   "mrp": 720
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:aabad-cow-ghee-gaay-nu-ghee-1-ltr",
+   "name": "Aabad Cow Ghee (Gaay Nu Ghee)",
+   "size": "1 ltr",
+   "price": 715,
+   "inStock": true,
+   "mrp": 780
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:darshana-pooja-ghee-non-edible-by-shubhkart-500-ml",
+   "name": "Darshana Pooja Ghee (Non-Edible) by Shubhkart",
+   "size": "500 ml",
+   "price": 180,
+   "inStock": true,
+   "mrp": 195
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:pooja-ghee-non-edible-by-hari-darshan-200-g",
+   "name": "Pooja Ghee (Non-Edible) by Hari Darshan",
+   "size": "200 g",
+   "price": 83,
+   "inStock": true,
+   "mrp": 96
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:amul-salted-butter-100-g",
+   "name": "Amul Salted Butter",
+   "size": "100 g",
+   "price": 63,
+   "inStock": true
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:amul-salted-butter-chiplets-100-g",
+   "name": "Amul Salted Butter (Chiplets)",
+   "size": "100 g",
+   "price": 80,
+   "inStock": true
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:amul-unsalted-butter-100-g",
+   "name": "Amul Unsalted Butter",
+   "size": "100 g",
+   "price": 65,
+   "inStock": true
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:amul-lite-milk-fat-spread-100-g",
+   "name": "Amul Lite Milk Fat Spread",
+   "size": "100 g",
+   "price": 50,
+   "inStock": true
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:amul-fresh-butter-cookies-200-g",
+   "name": "Amul Fresh Butter Cookies",
+   "size": "200 g",
+   "price": 85,
+   "inStock": true
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:mother-dairy-salted-butter-500-g-500-g",
+   "name": "Mother Dairy Salted Butter (500 g)",
+   "size": "500 g",
+   "price": 310,
+   "inStock": true
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:amul-masti-spiced-salted-buttermilk-200-ml",
+   "name": "Amul Masti Spiced Salted Buttermilk",
+   "size": "200 ml",
+   "price": 15,
+   "inStock": true
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:aashirvaad-shudh-chakki-atta-100-atta-0-maida-5-kg-lott-5-kg",
+   "name": "Aashirvaad Shudh Chakki Atta (100% Atta, 0% Maida, 5 Kg) (Lott)",
+   "size": "5 kg",
+   "price": 253,
+   "inStock": true,
+   "mrp": 291
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:aashirvaad-shudh-chakki-atta-100-atta-0-maida-lott-10-kg",
+   "name": "Aashirvaad Shudh Chakki Atta (100% Atta, 0% Maida) (Lott)",
+   "size": "10 kg",
+   "price": 445,
+   "inStock": true,
+   "mrp": 519
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:aashirvaad-high-fibre-atta-with-multigrains-5-kg-multigrain-lott-5-kg",
+   "name": "Aashirvaad High Fibre Atta with Multigrains - 5 kg (Multigrain Lott)",
+   "size": "5 kg",
+   "price": 324,
+   "inStock": true,
+   "mrp": 397
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:aashirvaad-select-100-mp-sharbati-atta-sharbati-lott-5-kg",
+   "name": "Aashirvaad Select 100% MP Sharbati Atta (Sharbati Lott)",
+   "size": "5 kg",
+   "price": 317,
+   "inStock": true,
+   "mrp": 384
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:aashirvaad-organic-atta-1-kg",
+   "name": "Aashirvaad Organic Atta",
+   "size": "1 kg",
+   "price": 74,
+   "inStock": true,
+   "mrp": 86
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:fortune-fresh-100-atta-0-maida-chakki-atta-lott-5-kg",
+   "name": "Fortune Fresh (100% Atta, 0% Maida) Chakki Atta (Lott)",
+   "size": "5 kg",
+   "price": 229,
+   "inStock": true,
+   "mrp": 277
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:maggi-masala-2-minutes-instant-noodles-made-with-quality-spices-280-g",
+   "name": "Maggi Masala - 2 Minutes Instant Noodles Made With Quality Spices",
+   "size": "280 g",
+   "price": 60,
+   "inStock": true
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:maggi-2-minutes-instant-noodles-made-with-quality-spices-420-g",
+   "name": "Maggi 2 Minutes Instant Noodles Made With Quality Spices",
+   "size": "420 g",
+   "price": 80,
+   "inStock": true,
+   "mrp": 90
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:maggi-2-minute-instant-noodles-made-with-quality-spices-840-g",
+   "name": "Maggi 2 - Minute Instant Noodles Made With Quality Spices",
+   "size": "840 g",
+   "price": 162,
+   "inStock": true,
+   "mrp": 180
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:maggi-2-minute-special-masala-instant-noodles-4-x-70-g",
+   "name": "Maggi 2-Minute Special Masala Instant Noodles",
+   "size": "4 x 70 g",
+   "price": 88,
+   "inStock": true,
+   "mrp": 100
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:maggi-double-masala-instant-noodles-95-g",
+   "name": "Maggi Double Masala Instant Noodles",
+   "size": "95 g",
+   "price": 20,
+   "inStock": true
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:maggi-masala-cuppa-noodles-70-5-g",
+   "name": "Maggi Masala Cuppa Noodles",
+   "size": "70.5 g",
+   "price": 50,
+   "inStock": true,
+   "mrp": 55
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:maggi-masala-ae-magic-sabzi-masala-sabajhi-masala-72-g",
+   "name": "Maggi Masala-ae-Magic Sabzi Masala (Sabajhi Masala)",
+   "size": "72 g",
+   "price": 55,
+   "inStock": true,
+   "mrp": 60
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:yippee-magic-masala-instant-noodles-with-added-veggies-435-6-g",
+   "name": "Yippee Magic Masala Instant Noodles with Added Veggies",
+   "size": "435.6 g",
+   "price": 69,
+   "inStock": true,
+   "mrp": 90
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:surf-excel-matic-top-load-liquid-detergent-1-kg",
+   "name": "Surf Excel Matic Top Load Liquid Detergent",
+   "size": "1 kg",
+   "price": 159,
+   "inStock": true
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:surf-excel-matic-top-load-liquid-detergent-3-kg",
+   "name": "Surf Excel Matic Top Load Liquid Detergent",
+   "size": "3 kg",
+   "price": 488,
+   "inStock": true,
+   "mrp": 525
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:surf-excel-matic-top-load-liquid-detergent-5-kg",
+   "name": "Surf Excel Matic Top Load Liquid Detergent",
+   "size": "5 kg",
+   "price": 639,
+   "inStock": true,
+   "mrp": 810
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:surf-excel-matic-front-load-liquid-detergent-1-ltr-1-ltr",
+   "name": "Surf Excel Matic Front Load Liquid Detergent (1 ltr)",
+   "size": "1 ltr",
+   "price": 169,
+   "inStock": true
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:surf-excel-matic-front-load-liquid-detergent-3-kg",
+   "name": "Surf Excel Matic Front Load Liquid Detergent",
+   "size": "3 kg",
+   "price": 583,
+   "inStock": true,
+   "mrp": 620
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:surf-excel-top-load-liquid-detergent-1-ltr",
+   "name": "Surf Excel Top Load Liquid Detergent",
+   "size": "1 ltr",
+   "price": 235,
+   "inStock": true
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:surf-excel-top-load-liquid-detergent-2-kg",
+   "name": "Surf Excel Top Load Liquid Detergent",
+   "size": "2 kg",
+   "price": 351,
+   "inStock": true,
+   "mrp": 370
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:surf-excel-matic-express-clean-care-liquid-detergent-2-ltr",
+   "name": "Surf Excel Matic Express Clean & Care Liquid Detergent",
+   "size": "2 ltr",
+   "price": 359,
+   "inStock": true,
+   "mrp": 448
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:onion-dungdi-1-kg",
+   "name": "Onion (Dungdi)",
+   "size": "1 kg",
+   "price": 66,
+   "inStock": true,
+   "mrp": 75
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:organically-grown-onion-dungdi-500-g",
+   "name": "Organically Grown - Onion (Dungdi)",
+   "size": "500 g",
+   "price": 56,
+   "inStock": true,
+   "mrp": 66
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:spring-onion-lili-dungdi-150-g",
+   "name": "Spring Onion (Lili Dungdi)",
+   "size": "150 g",
+   "price": 31,
+   "inStock": true,
+   "mrp": 40
+  },
+  {
+   "app": "blinkit",
+   "listingId": "blinkit:sambhar-onion-sambhar-dungdi-250-g",
+   "name": "Sambhar Onion (Sambhar Dungdi)",
+   "size": "250 g",
+   "price": 24,
+   "inStock": true,
+   "mrp": 31
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:amul-cow-ghee-500-ml-pouch",
+   "name": "Amul Cow Ghee",
+   "size": "500 ml - Pouch",
+   "price": 348.25,
+   "inStock": false,
+   "brand": "Amul",
+   "mrp": 350
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:amul-cow-ghee-1-l-pouch",
+   "name": "Amul Cow Ghee",
+   "size": "1 L - Pouch",
+   "price": 660,
+   "inStock": false,
+   "brand": "Amul",
+   "mrp": 695
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:amul-cow-ghee-500-ml-jar",
+   "name": "Amul Cow Ghee",
+   "size": "500 ml - Jar",
+   "price": 349,
+   "inStock": false,
+   "brand": "Amul",
+   "mrp": 355
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:amul-cow-ghee-1-l-tin",
+   "name": "Amul Cow Ghee",
+   "size": "1 L - Tin",
+   "price": 692,
+   "inStock": true,
+   "brand": "Amul",
+   "mrp": 705
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:amul-pure-ghee-1-l-pouch",
+   "name": "Amul Pure Ghee",
+   "size": "1 L - Pouch",
+   "price": 627,
+   "inStock": true,
+   "brand": "Amul",
+   "mrp": 640
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:amul-pure-ghee-500-ml-pouch",
+   "name": "Amul Pure Ghee",
+   "size": "500 ml - Pouch",
+   "price": 323.38,
+   "inStock": true,
+   "brand": "Amul",
+   "mrp": 325
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:amul-amul-pure-ghee-1-l-1-l-tin",
+   "name": "Amul Amul Pure Ghee 1 L",
+   "size": "1 L - Tin",
+   "price": 642,
+   "inStock": true,
+   "brand": "Amul",
+   "mrp": 650
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:gowardhan-ghee-1-l-bottle",
+   "name": "Gowardhan Ghee",
+   "size": "1 L - Bottle",
+   "price": 812,
+   "inStock": true,
+   "brand": "Gowardhan",
+   "mrp": 890
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:gowardhan-premium-ghee-500-ml-pouch",
+   "name": "Gowardhan Premium Ghee",
+   "size": "500 ml - Pouch",
+   "price": 416,
+   "inStock": true,
+   "brand": "Gowardhan",
+   "mrp": 455
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:patanjali-cow-s-ghee-1l-carton",
+   "name": "Patanjali Cow's Ghee",
+   "size": "1L - Carton",
+   "price": 784,
+   "inStock": true,
+   "brand": "Patanjali",
+   "mrp": 810
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:barosi-a2-desi-cow-ghee-1-l",
+   "name": "Barosi A2 Desi Cow Ghee",
+   "size": "1 L",
+   "price": 1611,
+   "inStock": true,
+   "brand": "Barosi",
+   "mrp": 2040
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:country-delight-desi-danedar-ghee-700-ml-jar",
+   "name": "Country Delight Desi Danedar Ghee",
+   "size": "700 ml - Jar",
+   "price": 617,
+   "inStock": true,
+   "brand": "Country Delight",
+   "mrp": 789
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:sankalp-by-om-bhakti-puja-ghee-500-ml",
+   "name": "Sankalp by Om Bhakti Puja Ghee",
+   "size": "500 ml",
+   "price": 175.12,
+   "inStock": true,
+   "brand": "Sankalp by Om Bhakti",
+   "mrp": 199
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:amul-pasteurised-butter-100-g-carton",
+   "name": "Amul Pasteurised Butter",
+   "size": "100 g - Carton",
+   "price": 63,
+   "inStock": true,
+   "brand": "Amul"
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:amul-pasteurised-butter-200-g-tub",
+   "name": "Amul Pasteurised Butter",
+   "size": "200 g - Tub",
+   "price": 130,
+   "inStock": true,
+   "brand": "Amul"
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:amul-unsalted-butter-500-g-carton",
+   "name": "Amul Unsalted Butter",
+   "size": "500 g - Carton",
+   "price": 320,
+   "inStock": true,
+   "brand": "Amul"
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:amul-pasturised-butter-chiplet-50-pcs-carton",
+   "name": "Amul Pasturised Butter Chiplet",
+   "size": "50 pcs - Carton",
+   "price": 635,
+   "inStock": true,
+   "brand": "Amul"
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:amul-lite-milk-fat-bread-spread-200-g-tub",
+   "name": "Amul Lite Milk Fat Bread Spread",
+   "size": "200 g - Tub",
+   "price": 105,
+   "inStock": true,
+   "brand": "Amul"
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:milky-mist-cooking-butter-unsalted-500-g-carton",
+   "name": "Milky Mist Cooking Butter - Unsalted",
+   "size": "500 g - Carton",
+   "price": 389,
+   "inStock": true,
+   "brand": "Milky Mist",
+   "mrp": 400
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:amul-butter-cookies-200-g",
+   "name": "Amul Butter Cookies",
+   "size": "200 g",
+   "price": 85,
+   "inStock": true,
+   "brand": "Amul"
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:aashirvaad-shudh-chakki-atta-ghau-no-lot-5-kg",
+   "name": "Aashirvaad Shudh Chakki Atta/Ghau No Lot",
+   "size": "5 kg",
+   "price": 247.5,
+   "inStock": true,
+   "brand": "Aashirvaad",
+   "mrp": 291
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:aashirvaad-shudh-chakki-atta-ghau-no-lot-10-kg",
+   "name": "Aashirvaad Shudh Chakki Atta/Ghau No Lot",
+   "size": "10 kg",
+   "price": 442,
+   "inStock": true,
+   "brand": "Aashirvaad",
+   "mrp": 519
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:aashirvaad-multigrains-atta-ghau-no-lot-5-kg",
+   "name": "Aashirvaad Multigrains Atta/Ghau No Lot",
+   "size": "5 kg",
+   "price": 299,
+   "inStock": true,
+   "brand": "Aashirvaad",
+   "mrp": 397
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:aashirvaad-select-mp-sharbati-atta-5-kg",
+   "name": "Aashirvaad Select MP Sharbati Atta",
+   "size": "5 kg",
+   "price": 299,
+   "inStock": true,
+   "brand": "Aashirvaad",
+   "mrp": 384
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:maggi-2-minute-instant-masala-noodles-2x420-g-multipack",
+   "name": "Maggi 2-Minute Instant Masala Noodles",
+   "size": "2x420 g - (Multipack)",
+   "price": 158,
+   "inStock": true,
+   "brand": "Maggi",
+   "mrp": 180
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:maggi-2-minute-special-masala-instant-noodles-3x70-g-multipack",
+   "name": "Maggi 2-Minute Special Masala Instant Noodles",
+   "size": "3x70 g - (Multipack)",
+   "price": 60,
+   "inStock": true,
+   "brand": "Maggi"
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:maggi-double-masala-instant-noodles-4x95-g-multipack",
+   "name": "Maggi Double Masala Instant Noodles",
+   "size": "4x95 g - (Multipack)",
+   "price": 75,
+   "inStock": true,
+   "brand": "Maggi",
+   "mrp": 80
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:maggi-nutri-licious-veg-atta-instant-noodles-290-g",
+   "name": "Maggi Nutri-Licious Veg Atta Instant Noodles",
+   "size": "290 g",
+   "price": 99,
+   "inStock": true,
+   "brand": "Maggi",
+   "mrp": 108
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:sunfeast-yippee-magic-masala-instant-noodles-272-g",
+   "name": "Sunfeast YiPPee! Magic Masala Instant Noodles",
+   "size": "272 g",
+   "price": 47.5,
+   "inStock": true,
+   "brand": "Sunfeast",
+   "mrp": 60
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:surf-excel-matic-liquid-detergent-for-top-load-5-kg",
+   "name": "Surf Excel Matic Liquid Detergent For Top Load",
+   "size": "5 kg",
+   "price": 652.5,
+   "inStock": true,
+   "brand": "Surf Excel",
+   "mrp": 780
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:surf-excel-matic-front-load-liquid-detergent-5-kg",
+   "name": "Surf Excel Matic Front Load Liquid Detergent",
+   "size": "5 kg",
+   "price": 779,
+   "inStock": true,
+   "brand": "Surf Excel",
+   "mrp": 932
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:surf-excel-matic-front-load-liquid-detergent-1-kg-pouch",
+   "name": "Surf Excel Matic Front Load Liquid Detergent",
+   "size": "1 kg - Pouch",
+   "price": 169,
+   "inStock": true,
+   "brand": "Surf Excel"
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:surf-excel-matic-express-clean-care-liquid-detergent-2-l",
+   "name": "Surf Excel Matic Express Clean & Care Liquid Detergent",
+   "size": "2 L",
+   "price": 368,
+   "inStock": true,
+   "brand": "Surf Excel",
+   "mrp": 448
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:surf-excel-matic-express-clean-care-liquid-detergent-830-ml",
+   "name": "Surf Excel Matic Express Clean & Care Liquid Detergent",
+   "size": "830 ml",
+   "price": 215,
+   "inStock": true,
+   "brand": "Surf Excel",
+   "mrp": 235
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:surf-excel-matic-top-load-detergent-powder-6-kg",
+   "name": "Surf Excel Matic Top Load Detergent Powder",
+   "size": "6 kg",
+   "price": 1285,
+   "inStock": true,
+   "brand": "Surf Excel",
+   "mrp": 1375
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:fresho-onion-1-kg",
+   "name": "fresho! Onion",
+   "size": "1 kg",
+   "price": 66,
+   "inStock": true,
+   "brand": "fresho!",
+   "mrp": 88.75
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:fresho-onion-organically-grown-1-kg",
+   "name": "fresho! Onion - Organically Grown",
+   "size": "1 kg",
+   "price": 68,
+   "inStock": true,
+   "brand": "fresho!",
+   "mrp": 97.5
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:fresho-onion-sambhar-250-g",
+   "name": "fresho! Onion - Sambhar",
+   "size": "250 g",
+   "price": 34,
+   "inStock": true,
+   "brand": "fresho!",
+   "mrp": 42.5
+  },
+  {
+   "app": "bigbasket",
+   "listingId": "bigbasket:fresho-spring-onion-250-g",
+   "name": "fresho! Spring Onion",
+   "size": "250 g",
+   "price": 32,
+   "inStock": true,
+   "brand": "fresho!",
+   "mrp": 40
+  }
+ ]
+}

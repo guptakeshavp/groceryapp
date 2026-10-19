@@ -1,0 +1,233 @@
+<!doctype html>
+<!--
+  PROTOTYPE — throwaway. Question: "What does the basket screen look like?"
+  Three structurally different variants of the one basket screen, switchable via ?variant=A|B|C
+  and the floating bar at the bottom (or ← / → keys).
+  Run: open basket_prototype.html   (no server needed)
+  Data: Blinkit + BigBasket item prices are REAL (Ahmedabad, 19 Oct 2026, see ../product-matching/).
+        Fees, Zepto, Instamart, Flipkart Minutes and the "Tata Salt" candidates are SAMPLE values,
+        there only to show the states (estimated / couldn't check / needs confirming).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PROTOTYPE — Basket screen</title>
+<style>
+  :root { --bg:#f6f5f2; --card:#fff; --ink:#1d1d1b; --muted:#6b6a66; --line:#e3e1dc;
+          --win:#0f7b4f; --winbg:#e5f4ec; --warn:#a15c00; --warnbg:#fff3df; --bad:#b3261e; --badbg:#fde8e6;
+          --sample:#7a5cc2; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:var(--bg); color:var(--ink); padding-bottom:90px; }
+  .wrap { max-width:1180px; margin:0 auto; padding:20px 16px; }
+  h1 { font-size:20px; margin:0 0 4px; } h2 { font-size:16px; margin:0 0 10px; }
+  .muted { color:var(--muted); } .small { font-size:13px; }
+  .banner { background:#efeafa; color:#3d2a77; border:1px dashed var(--sample); padding:8px 12px; border-radius:8px; font-size:13px; margin-bottom:16px; }
+  .tag { display:inline-block; font-size:11px; font-weight:600; padding:1px 6px; border-radius:999px; vertical-align:1px; }
+  .tag.sample { background:#efeafa; color:var(--sample); }
+  .tag.est { background:var(--warnbg); color:var(--warn); }
+  .tag.bad { background:var(--badbg); color:var(--bad); }
+  .tag.win { background:var(--winbg); color:var(--win); }
+  .tag.real { background:#e8f0fb; color:#1f4f99; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; }
+  textarea { width:100%; min-height:150px; font:14px/1.5 ui-monospace, Menlo, monospace; border:1px solid var(--line); border-radius:8px; padding:10px; resize:vertical; }
+  button { font:inherit; border:1px solid var(--line); background:#fff; border-radius:8px; padding:7px 12px; cursor:pointer; }
+  button.primary { background:var(--ink); color:#fff; border-color:var(--ink); }
+  table { border-collapse:collapse; width:100%; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { font-size:13px; color:var(--muted); font-weight:600; }
+  .num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .note { font-size:12px; color:var(--warn); }
+  .cheapest { background:var(--winbg); }
+  .grid2 { display:grid; grid-template-columns:340px 1fr; gap:16px; align-items:start; }
+  @media (max-width:860px){ .grid2 { grid-template-columns:1fr; } }
+  /* switcher */
+  #switcher { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); background:#111; color:#fff; border-radius:999px;
+              display:flex; align-items:center; gap:6px; padding:6px; box-shadow:0 6px 24px rgba(0,0,0,.35); z-index:99; font-size:14px; }
+  #switcher button { background:#2a2a2a; color:#fff; border:0; border-radius:999px; width:34px; height:34px; padding:0; }
+  #switcher span { padding:0 12px; white-space:nowrap; }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div id="switcher"><button id="prev" aria-label="Previous variant">←</button><span id="vlabel"></span><button id="next" aria-label="Next variant">→</button></div>
+
+<script>
+// ---------- data (real where tagged real) ----------
+const PASTE = `Bhai, order kar de:
+amul ghee 1 litre
+amul butter 500g
+aashirvaad atta 5kg
+maggi 1 packet (280g wala)
+surf excel matic top load 5kg
+pyaaz 1 kg
+tata salt`;
+
+const ITEMS = [
+  {id:'ghee',  label:'Amul Cow Ghee', qty:'1 L'},
+  {id:'butter',label:'Amul Salted Butter', qty:'500 g'},
+  {id:'atta',  label:'Aashirvaad Shudh Chakki Atta', qty:'5 kg'},
+  {id:'maggi', label:'Maggi Masala Noodles', qty:'280 g'},
+  {id:'surf',  label:'Surf Excel Matic Top Load Liquid', qty:'5 kg'},
+  {id:'onion', label:'Onion', qty:'1 kg', anyBrand:true},
+];
+const NEW_ITEM = {label:'Tata Salt', qty:'1 kg', candidates:[
+  {app:'Blinkit', name:'Tata Salt Vacuum Evaporated Iodised Salt', size:'1 kg', price:28, pick:true},
+  {app:'Blinkit', name:'Tata Salt Lite, Low Sodium', size:'1 kg', price:52},
+  {app:'BigBasket', name:'Tata Salt Iodized Salt', size:'1 kg - Pouch', price:28, pick:true},
+  {app:'BigBasket', name:'Tata Salt Rock Salt (Sendha Namak)', size:'1 kg', price:85},
+  {app:'Zepto', name:'Tata Salt Iodised Salt', size:'1 kg', price:28, pick:true},
+]};
+
+// per app: status, line items, fees. kind: real | sample
+const APPS = [
+  {app:'Blinkit', kind:'real', status:'ok', lines:{
+     ghee:{p:703, pack:'1 L pouch'}, butter:{p:315, pack:'5 × 100 g', note:'no 500 g pack'},
+     atta:{p:253, pack:'5 kg'}, maggi:{p:60, pack:'280 g'}, surf:{p:639, pack:'5 kg'}, onion:{p:66, pack:'1 kg'}},
+   fees:[['Delivery',0,'free above ₹199'],['Handling',9,'sample']], coupons:[]},
+  {app:'BigBasket', kind:'real', status:'ok', lines:{
+     ghee:{p:692, pack:'1 L tin', note:'pouch out of stock'}, butter:{p:315, pack:'5 × 100 g', note:'"Pasteurised Butter" = salted (confirmed)'},
+     atta:{p:247.5, pack:'5 kg'}, maggi:{p:158, pack:'2 × 420 g', note:'closest pack is 840 g — 3× what you wanted'},
+     surf:{p:652.5, pack:'5 kg'}, onion:{p:66, pack:'1 kg'}},
+   fees:[['Delivery',0,'sample'],['Handling',0,'sample']], coupons:[]},
+  {app:'Instamart', kind:'sample', status:'est', estNote:'Your Instamart cart had 2 items — you chose "estimate". Fees as of 12 Oct.', lines:{
+     ghee:{p:710, pack:'1 L pouch'}, butter:{p:318, pack:'5 × 100 g'}, atta:{p:255, pack:'5 kg'},
+     maggi:{p:62, pack:'280 g'}, surf:{p:655, pack:'5 kg'}, onion:{p:69, pack:'1 kg'}},
+   fees:[['Delivery',0,'Swiggy One'],['Handling',9,'as of 12 Oct']], coupons:['FLAT75 — ₹75 off above ₹499']},
+  {app:'Zepto', kind:'sample', status:'ok', lines:{
+     ghee:{p:715, pack:'1 L pouch'}, butter:{p:330, pack:'5 × 100 g'}, atta:{p:259, pack:'5 kg'},
+     maggi:{p:60, pack:'280 g'}, surf:{p:649, pack:'5 kg'}, onion:{p:72, pack:'1 kg'}},
+   fees:[['Delivery',0,''],['Handling',0,'']], coupons:[], gap:'Some app-only deals not visible to the tool'},
+  {app:'Flipkart Minutes', kind:'sample', status:'fail', why:'Couldn\'t check — Flipkart cart rate-limited (HTTP 429). Retried once.', lines:{}, fees:[], coupons:[]},
+];
+const rupee = n => '₹' + (Math.round(n*100)/100).toLocaleString('en-IN', {maximumFractionDigits:2});
+const itemsTotal = a => ITEMS.reduce((s,i)=> s + (a.lines[i.id]?.p ?? 0), 0);
+const feeTotal = a => a.fees.reduce((s,f)=>s+f[1],0);
+const total = a => itemsTotal(a) + feeTotal(a);
+const ranked = APPS.filter(a=>a.status!=='fail').sort((x,y)=>total(x)-total(y));
+const winner = ranked[0];
+const kindTag = a => a.kind==='real' ? '<span class="tag real">real prices</span>' : '<span class="tag sample">sample</span>';
+const statusTag = a => a.status==='est' ? '<span class="tag est">estimated</span>' : a.status==='fail' ? '<span class="tag bad">couldn\'t check</span>' : '';
+const banner = `<div class="banner"><b>PROTOTYPE.</b> Blinkit &amp; BigBasket item prices are real (Ahmedabad, 19 Oct). Fees, Zepto, Instamart, Flipkart Minutes and the Tata Salt candidates are <span class="tag sample">sample</span> values to show the states.</div>`;
+const cheapestApp = id => { let b=null; for (const a of APPS) { const l=a.lines[id]; if (l && (!b || l.p < b.p)) b={app:a.app,p:l.p}; } return b; };
+
+// ---------- Variant A — comparison grid ----------
+function VariantA(){
+  const cols = APPS;
+  return `${banner}
+  <h1>Basket</h1><p class="muted small">Rows are your Items, columns are apps. Green = cheapest for that line. Totals are all-in.</p>
+  <div class="card" style="margin-bottom:14px">
+    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+      <input placeholder="Add an Item… e.g. 'tata salt 1 kg'" style="flex:1; min-width:220px; font:inherit; padding:8px 10px; border:1px solid var(--line); border-radius:8px">
+      <button>Paste WhatsApp list</button><button>Load "Weekly staples"</button><button class="primary">Compare</button>
+    </div>
+  </div>
+  <div class="card" style="overflow-x:auto">
+  <table>
+    <tr><th>Item</th><th>Qty</th>${cols.map(a=>`<th class="num">${a.app}<br>${kindTag(a)} ${statusTag(a)}</th>`).join('')}</tr>
+    ${ITEMS.map(i=>{ const c=cheapestApp(i.id); return `<tr><td>${i.label}${i.anyBrand?' <span class="tag real">any brand</span>':''}</td><td class="muted">${i.qty}</td>
+      ${cols.map(a=>{ const l=a.lines[i.id]; if(a.status==='fail') return '<td class="num muted">—</td>';
+        if(!l) return '<td class="num"><span class="tag bad">unavailable</span></td>';
+        return `<td class="num ${c && c.app===a.app?'cheapest':''}">${rupee(l.p)}<div class="small muted">${l.pack}</div>${l.note?`<div class="note">${l.note}</div>`:''}</td>`;}).join('')}</tr>`; }).join('')}
+    <tr><td colspan="2"><b>Tata Salt 1 kg</b> <span class="tag est">new Item — confirm matches</span></td>${cols.map(()=>'<td class="num"><button class="small">Pick…</button></td>').join('')}</tr>
+    <tr><td colspan="2" class="muted">Fees</td>${cols.map(a=> a.status==='fail' ? '<td></td>' : `<td class="num muted small">${a.fees.map(f=>`${f[0]} ${rupee(f[1])}`).join('<br>')}</td>`).join('')}</tr>
+    <tr><td colspan="2"><b>All-in total</b></td>${cols.map(a=> a.status==='fail'
+        ? `<td class="num"><span class="tag bad">couldn't check</span><div class="small muted" style="white-space:normal">${a.why}</div></td>`
+        : `<td class="num ${a===winner?'cheapest':''}"><b>${rupee(total(a))}</b>${a===winner?'<div><span class="tag win">cheapest</span></div>':''}${a.status==='est'?`<div class="note" style="white-space:normal">${a.estNote}</div>`:''}${a.coupons.map(c=>`<div class="small muted" style="white-space:normal">Coupon: ${c}</div>`).join('')}</td>`).join('')}</tr>
+  </table></div>
+  <p class="small muted">Splitting across apps (cheapest per line): ${splitNote()}</p>`;
+}
+function splitNote(){
+  // per-line cheapest among real apps only, two deliveries
+  const by = {}; let sum=0;
+  for (const i of ITEMS){ const c=cheapestApp(i.id); by[c.app]=(by[c.app]||0)+c.p; sum+=c.p; }
+  const apps=Object.keys(by); const fees = apps.reduce((s,n)=>s+feeTotal(APPS.find(a=>a.app===n)),0);
+  return `${apps.join(' + ')} = ${rupee(sum+fees)} vs ${rupee(total(winner))} on ${winner.app} alone → saves ${rupee(total(winner)-(sum+fees))} for ${apps.length} deliveries.`;
+}
+
+// ---------- Variant B — verdict first ----------
+function VariantB(){
+  const second = ranked[1];
+  const issues = [];
+  for (const a of APPS) for (const i of ITEMS){ const l=a.lines[i.id]; if (l?.note) issues.push(`<b>${a.app}</b> · ${i.label}: ${l.note}`); }
+  return `${banner}
+  <div class="grid2">
+    <div class="card">
+      <h2>Paste the family's list</h2>
+      <textarea>${PASTE}</textarea>
+      <div class="small muted" style="margin:6px 0 10px">Understood 6 known Items + 1 new (Tata Salt).</div>
+      <button class="primary">Compare 5 apps</button>
+      <hr style="border:0;border-top:1px solid var(--line); margin:16px 0">
+      <h2>Needs you (1)</h2>
+      <div class="small"><b>Tata Salt 1 kg</b> is new. <button class="small">Confirm matches</button></div>
+    </div>
+    <div>
+      <div class="card" style="background:var(--winbg); border-color:#bfe3cf; margin-bottom:14px">
+        <div class="small" style="color:var(--win); font-weight:600">CHEAPEST ALL-IN</div>
+        <div style="font-size:30px; font-weight:700">${winner.app} · ${rupee(total(winner))}</div>
+        <div>${rupee(total(second)-total(winner))} less than ${second.app}${second.status==='est'?' (estimated)':''}. ${kindTag(winner)}</div>
+        <div style="margin-top:10px"><button class="primary">Open ${winner.app}</button> <button>Copy list</button></div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <h2>All apps</h2>
+        <table>
+        ${[...ranked, ...APPS.filter(a=>a.status==='fail')].map(a=>`<tr><td style="width:40%"><b>${a.app}</b> ${kindTag(a)} ${statusTag(a)}
+            ${a.status==='est'?`<div class="note">${a.estNote}</div>`:''}${a.status==='fail'?`<div class="small muted">${a.why}</div>`:''}${a.gap?`<div class="small muted">${a.gap}</div>`:''}</td>
+          <td class="num">${a.status==='fail'?'—':rupee(total(a))}</td>
+          <td class="small muted">${a.status==='fail'?'<button class="small">Retry</button>':`items ${rupee(itemsTotal(a))} + fees ${rupee(feeTotal(a))}`}${a.coupons.map(c=>`<div>Coupon: ${c}</div>`).join('')}</td>
+          <td><details><summary class="small">bill</summary><div class="small">${ITEMS.map(i=>a.lines[i.id]?`${i.label} (${a.lines[i.id].pack}) ${rupee(a.lines[i.id].p)}`:'').filter(Boolean).join('<br>')}<br>${a.fees.map(f=>`${f[0]} ${rupee(f[1])}`).join('<br>')}</div></details></td></tr>`).join('')}
+        </table>
+      </div>
+      <div class="card">
+        <h2>Worth knowing (${issues.length})</h2>
+        <div class="small">${issues.map(x=>`<div style="padding:4px 0; border-bottom:1px solid var(--line)">${x}</div>`).join('')}</div>
+        <div class="small muted" style="margin-top:8px">Split option: ${splitNote()}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ---------- Variant C — step-by-step flow ----------
+function VariantC(){
+  const step = Number(new URLSearchParams(location.search).get('step') || 1);
+  const steps = ['1 · List','2 · Confirm new','3 · Result'];
+  const nav = `<div style="display:flex; gap:6px; margin-bottom:16px">${steps.map((s,i)=>`<button onclick="setStep(${i+1})" class="${step===i+1?'primary':''}">${s}</button>`).join('')}</div>`;
+  let body = '';
+  if (step===1) body = `<div class="card"><h2>What do we need?</h2>
+      <table>${ITEMS.map(i=>`<tr><td>☑</td><td>${i.label}</td><td><input value="${i.qty}" style="width:80px; font:inherit; padding:4px 6px; border:1px solid var(--line); border-radius:6px"></td><td class="small muted">from "Weekly staples"</td></tr>`).join('')}
+      <tr><td>☑</td><td><b>Tata Salt</b> <span class="tag est">new</span></td><td><input value="1 kg" style="width:80px; font:inherit; padding:4px 6px; border:1px solid var(--line); border-radius:6px"></td><td class="small muted">from pasted message</td></tr></table>
+      <div style="margin-top:12px; display:flex; gap:8px"><button>+ Paste WhatsApp list</button><button>+ Add Item</button><button class="primary" onclick="setStep(2)">Next</button></div></div>`;
+  if (step===2) body = `<div class="card"><h2>Tata Salt 1 kg — which listing is ours on each app?</h2>
+      <p class="small muted">Claude's best guess is pre-ticked. You only do this once per Item. <span class="tag sample">sample</span></p>
+      ${['Blinkit','BigBasket','Zepto','Instamart','Flipkart Minutes'].map(app=>{ const c=NEW_ITEM.candidates.filter(x=>x.app===app);
+        return `<div style="margin:10px 0"><b>${app}</b>${c.length?c.map(x=>`<label style="display:block; padding:4px 0"><input type="radio" name="${app}" ${x.pick?'checked':''}> ${x.name} · ${x.size} · ${rupee(x.price)}</label>`).join(''):'<div class="small muted">not searched yet — will ask after this run</div>'}</div>`; }).join('')}
+      <label class="small"><input type="checkbox"> Any brand is fine for this Item</label>
+      <div style="margin-top:12px"><button class="primary" onclick="setStep(3)">Save &amp; compare</button></div></div>`;
+  if (step===3) {
+    const max = Math.max(...ranked.map(total));
+    body = `<div class="card"><h2>All-in totals</h2>
+      ${[...ranked, ...APPS.filter(a=>a.status==='fail')].map(a=>`<div style="display:grid; grid-template-columns:150px 1fr 110px; gap:10px; align-items:center; margin:10px 0">
+        <div><b>${a.app}</b><br>${kindTag(a)} ${statusTag(a)}</div>
+        <div style="background:var(--bg); border-radius:6px; height:26px; position:relative">${a.status==='fail'?`<div class="small muted" style="padding:4px 8px">${a.why}</div>`:`<div style="height:100%; width:${(total(a)/max*100).toFixed(1)}%; background:${a===winner?'var(--win)':'#c9c6bf'}; border-radius:6px; ${a.status==='est'?'background-image:repeating-linear-gradient(45deg,transparent 0 6px,rgba(255,255,255,.5) 6px 12px)':''}"></div>`}</div>
+        <div class="num">${a.status==='fail'?'—':`<b>${rupee(total(a))}</b>`}</div></div>`).join('')}
+      <p class="small muted">Hatched = estimated. ${ranked.find(a=>a.status==='est')?.estNote ?? ''}</p></div>
+      <div class="card" style="margin-top:14px"><h2>Before you order on ${winner.app}</h2><ul class="small">
+        ${ITEMS.map(i=>{const l=winner.lines[i.id]; return l?.note?`<li>${i.label}: ${l.note}</li>`:'';}).join('')}
+        <li>Split option: ${splitNote()}</li></ul><button class="primary">Open ${winner.app}</button></div>`;
+  }
+  return `${banner}<h1>New basket</h1>${nav}${body}`;
+}
+function setStep(n){ const u=new URL(location); u.searchParams.set('step', n); history.replaceState(null,'',u); render(); }
+
+// ---------- switcher ----------
+const VARIANTS = [['A','Comparison grid',VariantA],['B','Verdict first',VariantB],['C','Step-by-step flow',VariantC]];
+function current(){ const v=new URLSearchParams(location.search).get('variant')||'A'; return Math.max(0, VARIANTS.findIndex(x=>x[0]===v)); }
+function go(d){ const i=(current()+d+VARIANTS.length)%VARIANTS.length; const u=new URL(location); u.searchParams.set('variant', VARIANTS[i][0]); u.searchParams.delete('step'); history.replaceState(null,'',u); render(); }
+function render(){ const [k,name,fn]=VARIANTS[current()]; document.getElementById('app').innerHTML=fn(); document.getElementById('vlabel').textContent=`${k} — ${name}`; }
+document.getElementById('prev').onclick=()=>go(-1); document.getElementById('next').onclick=()=>go(1);
+document.addEventListener('keydown', e=>{ const t=e.target; if (t.closest && t.closest('input,textarea,[contenteditable]')) return;
+  if (e.key==='ArrowLeft') go(-1); if (e.key==='ArrowRight') go(1); });
+render();
+</script>
+</body>
+</html>
