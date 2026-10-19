@@ -1,0 +1,92 @@
+[
+ {
+  "app": "zepto",
+  "listingId": "zepto:a51adb68-44d1-476e-ae7b-aa701d6fc4de",
+  "name": "Farmse A2 Gir Cow Ghee 1L | Bilona Method ",
+  "size": "1 pack (1 l)",
+  "price": 1289,
+  "mrp": 2500,
+  "inStock": true
+ },
+ {
+  "app": "zepto",
+  "listingId": "zepto:a2b351fd-7907-4cd4-afbc-12514188cf2f",
+  "name": "DeHaat HF A2 Gir Cow Ghee | Pure & Traditional",
+  "size": "1 pc (500 ml)",
+  "price": 749,
+  "mrp": 1480,
+  "inStock": true
+ },
+ {
+  "app": "zepto",
+  "listingId": "zepto:7158f073-9919-430c-b329-aac11abee944",
+  "name": "Anveshan A2 Desi Cow Ghee | Pure & Traditional",
+  "size": "1 pc (150 ml)",
+  "price": 226,
+  "mrp": 350,
+  "inStock": true
+ },
+ {
+  "app": "zepto",
+  "listingId": "zepto:4ac4f80d-287b-4719-ac33-0b5a8ab73e78",
+  "name": "Anveshan A2 Desi Cow Ghee | Pure & Traditional",
+  "size": "1 pc (500 ml)",
+  "price": 888,
+  "mrp": 1125,
+  "inStock": true
+ },
+ {
+  "app": "zepto",
+  "listingId": "zepto:11585894-ca1f-459e-b3f2-8bdcf94caab8",
+  "name": "Barosi A2 Desi Cow Ghee Jar | Classic & Authentic",
+  "size": "1 pc (500 ml)",
+  "price": 811,
+  "mrp": 1080,
+  "inStock": true
+ },
+ {
+  "app": "zepto",
+  "listingId": "zepto:2e678e64-bafc-42d1-a78a-225fe2941897",
+  "name": "Gowardhan Pure Cow Ghee | Pouch",
+  "size": "1 pack (1 L)",
+  "price": 810,
+  "mrp": 870,
+  "inStock": true
+ },
+ {
+  "app": "zepto",
+  "listingId": "zepto:ebd1f9c5-95aa-4f61-b17f-48e3ed07ac48",
+  "name": "Gowardhan Pure Cow Ghee | Jar",
+  "size": "1 pc (200 ml)",
+  "price": 177,
+  "mrp": 205,
+  "inStock": true
+ },
+ {
+  "app": "zepto",
+  "listingId": "zepto:32fe31b9-7ec7-445a-8497-96acee80b8d3",
+  "name": "Gowardhan Pure Cow Ghee | Jar",
+  "size": "1 pc (1 L)",
+  "price": 814,
+  "mrp": 890,
+  "inStock": true
+ },
+ {
+  "app": "zepto",
+  "listingId": "zepto:6bf66aa6-78ea-4b05-8201-e1874e4c9083",
+  "name": "Patanjali Cow Ghee PET Jar - Pure Danedar, Rich Aroma, Cow Ghee",
+  "size": "1 pack (200 ml)",
+  "price": 18000,
+  "mrp": 18000,
+  "inStock": true
+ },
+ {
+  "app": "zepto",
+  "listingId": "zepto:1b281d69-798d-489a-9831-bb73d55d61fe",
+  "name": "Sanchi Ghee | Pure & Classic",
+  "size": "1 pack (1 L)",
+  "price": 639,
+  "mrp": 650,
+  "inStock": true
+ }
+]
