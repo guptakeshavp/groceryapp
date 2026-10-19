@@ -1,8 +1,8 @@
 // Manual smoke test of a real adapter (spec: Testing Decisions). Read-only.
-// Usage: node scripts/smoke.ts zepto|instamart|blinkit|bigbasket "amul cow ghee"
+// Usage: node scripts/smoke.ts zepto|instamart|blinkit|bigbasket|minutes "amul cow ghee"
 // Prints the first few listings and saves the raw listings under data/smoke/ for fixtures.
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { BigBasketAdapter, BlinkitAdapter, ChromeSession } from '../src/adapters/chrome.ts';
+import { BigBasketAdapter, BlinkitAdapter, ChromeSession, MinutesAdapter } from '../src/adapters/chrome.ts';
 import { InstamartAdapter } from '../src/adapters/instamart.ts';
 import { ZeptoAdapter } from '../src/adapters/zepto.ts';
 
@@ -15,9 +15,10 @@ const adapters = {
   instamart: () => new InstamartAdapter({ homePincode: HOME_PIN }),
   blinkit: () => new BlinkitAdapter(chrome),
   bigbasket: () => new BigBasketAdapter(chrome),
+  minutes: () => new MinutesAdapter(chrome),
 };
 if (!(app in adapters)) {
-  console.error('Usage: node scripts/smoke.ts zepto|instamart|blinkit|bigbasket "<query>"');
+  console.error('Usage: node scripts/smoke.ts zepto|instamart|blinkit|bigbasket|minutes "<query>"');
   process.exit(2);
 }
 const adapter = adapters[app as keyof typeof adapters]();

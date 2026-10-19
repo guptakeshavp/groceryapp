@@ -42,3 +42,28 @@ test('Blinkit cards: stable product ids, and confirmations made under old name-b
   assert.ok(blinkitIdMatches(l, new Set(['blinkit:159'])));
   assert.ok(!blinkitIdMatches(l, new Set(['blinkit:999'])));
 });
+
+test('Flipkart Minutes cards: MRP first then price, sponsored cards dropped, pid as id (real text, 2026-10-19)', async () => {
+  const { parseMinutesCard } = await import('../src/adapters/page-parsers.ts');
+  assert.deepEqual(parseMinutesCard('GHEX', 'Best Seller\n2%\nOff\n1 L\nAmul Cow Ghee Pouch\n₹635 \n₹622 \nAdd'), {
+    app: 'minutes', listingId: 'minutes:GHEX', name: 'Amul Cow Ghee Pouch', size: '1 L', price: 622, mrp: 635, inStock: true,
+  });
+  assert.equal(parseMinutesCard('P2', 'AD\n2%\nOff\n1 L\nPATANJALI Pure Danedar Cow Ghee Box\n₹810 \n₹793 \nAdd'), undefined);
+  assert.equal(parseMinutesCard('P3', '500 ml\nAABAD Cow Ghee Pouch\n₹391 \nNotify Me')?.inStock, false);
+});
+
+test('Flipkart Minutes page: every card parsed, header skipped, pid where a link exists (real text, 2026-10-19)', async () => {
+  const { parseMinutesPage } = await import('../src/adapters/page-parsers.ts');
+  const ls = parseMinutesPage(page('minutes-amul-cow-ghee-2026-10-19.txt'), { 'AABAD Cow Ghee Pouch': 'GHEG7ZSZMRJYS6RH' });
+  assert.deepEqual(ls.map((l) => [l.listingId, l.name, l.size, l.price, l.mrp]), [
+    ['minutes:amul-cow-ghee-pouch-1-l', 'Amul Cow Ghee Pouch', '1 L', 622, 635],
+    ['minutes:amul-cow-tetrapack-1-l', 'Amul Cow Tetrapack', '1 L', 632, 645],
+    ['minutes:GHEG7ZSZMRJYS6RH', 'AABAD Cow Ghee Pouch', '500 ml', 340, 391],
+  ]);
+});
+
+test('Flipkart Minutes page: repeated cards are de-duplicated', async () => {
+  const { parseMinutesPage } = await import('../src/adapters/page-parsers.ts');
+  const text = 'Cart\n450 ml\nBaidyanath Pure Desi Ghee Tetrapack\n₹350 \nAdd\n450 ml\nBaidyanath Pure Desi Ghee Tetrapack\n₹350 \nAdd';
+  assert.equal(parseMinutesPage(text, {}).length, 1);
+});

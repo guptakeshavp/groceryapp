@@ -78,6 +78,51 @@ export function parseBigBasketText(text: string): Listing[] {
   return out;
 }
 
+/**
+ * One Flipkart Minutes card's text: [AD] · [Best Seller] · ["n%" · "Off"] · size · name · ₹mrp · ₹price · "Add".
+ * The struck-through MRP comes first; the lower price is what you pay. Sponsored ("AD") cards are dropped.
+ */
+export function parseMinutesCard(pid: string, text: string): Listing | undefined {
+  const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
+  if (lines.includes('AD')) return undefined;
+  const body = lines.filter((l) => !/^(Best Seller|Off|\d+%|Bestseller|New)$/i.test(l));
+  const prices = body.filter(isPrice).map(rupees);
+  const words = body.filter((l) => !isPrice(l) && !/^(Add|Notify Me|Out of Stock|Sold Out|Coming Soon)$/i.test(l));
+  const sizeAt = words.findIndex((l) => /^\d+(\.\d+)?\s*(x\s*\d+(\.\d+)?\s*)?(kg|g|ml|l|pcs|pc|units?)\b/i.test(l));
+  const size = sizeAt >= 0 ? words[sizeAt] : '';
+  const name = words.filter((_, k) => k !== sizeAt).join(' ');
+  if (!name || prices.length === 0) return undefined;
+  return {
+    app: 'minutes', listingId: `minutes:${pid}`, name, size,
+    price: Math.min(...prices), mrp: prices.length > 1 ? Math.max(...prices) : undefined,
+    inStock: !/Notify Me|Out of Stock|Sold Out/i.test(text),
+  };
+}
+
+/**
+ * Whole Minutes results page. Cards end at "Add"/"Notify Me"; the header ends at "Cart". Some cards (the
+ * top "Best Seller" block) have no product link, so `pidByName` (from links that exist) supplies Flipkart's
+ * pid where it can, and a name+size slug otherwise.
+ */
+export function parseMinutesPage(text: string, pidByName: Record<string, string>): Listing[] {
+  const all = text.split('\n').map((l) => l.trim()).filter(Boolean);
+  const start = all.indexOf('Cart') + 1;
+  const out: Listing[] = [];
+  let card: string[] = [];
+  for (const line of all.slice(start)) {
+    card.push(line);
+    if (!/^(Add|Notify Me|Out of Stock|Sold Out)$/i.test(line)) continue;
+    const draft = parseMinutesCard('', card.join('\n'));
+    card = [];
+    if (!draft) continue;
+    const pid = pidByName[draft.name];
+    const id = pid ? `minutes:${pid}` : listingId('minutes', `${draft.name} ${draft.size}`);
+    if (out.some((l) => l.listingId === id)) continue; // Flipkart repeats some cards
+    out.push({ ...draft, listingId: id });
+  }
+  return out;
+}
+
 /** Signs the page is a bot challenge or empty rather than results. */
 export function looksBlocked(text: string): 'blocked' | 'blank' | undefined {
   if (/access denied|verify you are human|are you a robot|captcha|request blocked|attention required/i.test(text)) return 'blocked';

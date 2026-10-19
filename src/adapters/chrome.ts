@@ -3,7 +3,7 @@ import { type BrowserContext, chromium } from 'playwright-core';
 import type { AuthStatus, Listing } from '../domain/types.ts';
 import { AdapterError } from '../domain/types.ts';
 import type { PlatformAdapter } from './adapter.ts';
-import { blinkitIdMatches, looksBlocked, parseBigBasketText, parseBlinkitCards } from './page-parsers.ts';
+import { blinkitIdMatches, looksBlocked, parseBigBasketText, parseBlinkitCards, parseMinutesPage } from './page-parsers.ts';
 
 export const profileDir = (dataDir = 'data') => join(dataDir, 'chrome-profile');
 
@@ -42,12 +42,14 @@ export class ChromeSession {
   }
 
   /** Load a page, wait for `ready`, then run `script` in it. */
-  async pageEval<T>(url: string, ready: RegExp, script: () => T, timeoutMs = 15_000): Promise<{ text: string; value: T }> {
+  async pageEval<T>(url: string, ready: RegExp, script: () => T, opts: { timeoutMs?: number; settleMs?: number } = {}): Promise<{ text: string; value: T }> {
+    const timeoutMs = opts.timeoutMs ?? 15_000;
     const context = await this.open();
     const page = await context.newPage();
     try {
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: timeoutMs });
       await page.waitForFunction((re) => new RegExp(re, 'i').test(document.body?.innerText ?? ''), ready.source, { timeout: timeoutMs }).catch(() => undefined);
+      if (opts.settleMs) await page.waitForTimeout(opts.settleMs); // let late blocks (e.g. Minutes' "Best Seller" row) render
       return { text: await page.evaluate(() => document.body?.innerText ?? ''), value: await page.evaluate(script) };
     } finally {
       await page.close();
@@ -61,7 +63,7 @@ export class ChromeSession {
 }
 
 abstract class ChromeSiteAdapter implements PlatformAdapter {
-  abstract readonly app: 'blinkit' | 'bigbasket';
+  abstract readonly app: 'blinkit' | 'bigbasket' | 'minutes';
   protected readonly chrome: ChromeSession;
   constructor(chrome: ChromeSession) {
     this.chrome = chrome;
@@ -139,5 +141,38 @@ export class BigBasketAdapter extends ChromeSiteAdapter {
   protected checkLocation(text: string) {
     if (/Login\/ Sign Up/.test(text)) throw new AdapterError('login-expired', 'not logged in to BigBasket in the automated Chrome — run npm run chrome-setup');
     if (/^Select Location$/m.test(text)) throw new AdapterError('error', 'home address not set on BigBasket — run npm run chrome-setup');
+  }
+}
+
+/** Flipkart Minutes: flipkart.com search in hyperlocal mode, home address set once in the profile. */
+export class MinutesAdapter extends ChromeSiteAdapter {
+  readonly app = 'minutes' as const;
+  protected url(q: string) {
+    return `https://www.flipkart.com/search?q=${encodeURIComponent(q)}&marketplace=HYPERLOCAL`;
+  }
+  protected parse(): Listing[] {
+    return []; // search() reads cards from the DOM
+  }
+  protected checkLocation(text: string) {
+    if (/enter (your )?(delivery )?(pincode|location|address)|select (a )?delivery location/i.test(text) && !/₹/.test(text)) {
+      throw new AdapterError('error', 'home address not set on Flipkart Minutes in the automated Chrome — run npm run chrome-setup');
+    }
+  }
+
+  async search(query: string): Promise<Listing[]> {
+    const { text, value: pidByName } = await this.chrome.pageEval(this.url(query), /₹|captcha|access denied/, () => {
+      const map: Record<string, string> = {};
+      for (const a of document.querySelectorAll('a[href*="pid="]')) {
+        const pid = new URL((a as HTMLAnchorElement).href).searchParams.get('pid');
+        const name = (a as HTMLElement).innerText.trim();
+        if (pid && name && !name.includes('\n')) map[name] = pid;
+      }
+      return map;
+    }, { settleMs: 3000 });
+    this.checkLocation(text);
+    const listings = parseMinutesPage(text, pidByName);
+    if (listings.length === 0 && /captcha|access denied|are you a robot/i.test(text)) throw new AdapterError('blocked', 'challenge page');
+    if (listings.length === 0 && !/₹/.test(text)) throw new AdapterError('blank', 'empty results page');
+    return listings;
   }
 }

@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import type { PlatformAdapter } from './adapters/adapter.ts';
-import { BigBasketAdapter, BlinkitAdapter, ChromeSession, profileDir } from './adapters/chrome.ts';
+import { BigBasketAdapter, BlinkitAdapter, ChromeSession, MinutesAdapter, profileDir } from './adapters/chrome.ts';
 import { FakeAdapter } from './adapters/fake.ts';
 import { InstamartAdapter } from './adapters/instamart.ts';
 import { ZeptoAdapter } from './adapters/zepto.ts';
@@ -153,6 +153,7 @@ function defaultSources(dataDir: string): AppSource[] {
     { adapter: new InstamartAdapter({ homePincode: HOME_PIN, dataDir }), source: 'live' },
     site(new BlinkitAdapter(chrome), 'blinkit'),
     site(new BigBasketAdapter(chrome), 'bigbasket'),
+    ...(chromeReady ? [{ adapter: new MinutesAdapter(chrome), source: 'live' }] : []),
   ];
 }
 
