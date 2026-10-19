@@ -10,7 +10,8 @@
     "test": "node --test \"test/**/*.test.ts\"",
     "typecheck": "tsc -p .",
     "probe": "node scripts/mcp-probe.ts",
-    "smoke": "node scripts/smoke.ts"
+    "smoke": "node scripts/smoke.ts",
+    "start": "node src/server.ts"
   },
   "devDependencies": {
     "@types/node": "24.10.1",

@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grocery compare</title>
+<style>
+  :root { --bg:#f6f5f2; --card:#fff; --ink:#1d1d1b; --muted:#6b6a66; --line:#e3e1dc; --win:#0f7b4f; --winbg:#e5f4ec;
+          --warn:#a15c00; --warnbg:#fff3df; --bad:#b3261e; --badbg:#fde8e6; --deal:#7a3fb8; --dealbg:#f1e8fb; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#161614; --card:#20201d; --ink:#ecebe7; --muted:#a3a19b; --line:#34332f;
+          --winbg:#173528; --warnbg:#3a2c12; --badbg:#3d1a17; --dealbg:#2c1f3d; --win:#5fd39b; --deal:#c39bf0; } }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:1180px; margin:0 auto; padding:20px 16px 60px; }
+  h1 { font-size:20px; margin:0 0 12px; } h2 { font-size:16px; margin:0 0 10px; }
+  .muted { color:var(--muted); } .small { font-size:13px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; }
+  .grid { display:grid; grid-template-columns:360px 1fr; gap:16px; align-items:start; }
+  @media (max-width:860px){ .grid { grid-template-columns:1fr; } }
+  textarea, input[type=text] { width:100%; font:inherit; border:1px solid var(--line); border-radius:8px; padding:9px 10px; background:var(--card); color:var(--ink); }
+  textarea { min-height:190px; font:14px/1.5 ui-monospace, Menlo, monospace; resize:vertical; }
+  button { font:inherit; border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:8px; padding:7px 12px; cursor:pointer; }
+  button.primary { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+  button:disabled { opacity:.5; cursor:default; }
+  .notice { background:var(--warnbg); color:var(--warn); border-radius:8px; padding:6px 10px; font-size:13px; margin-bottom:6px; }
+  .deals { background:var(--dealbg); border-radius:12px; padding:10px 14px; margin-bottom:14px; }
+  .deals b { color:var(--deal); }
+  .tag { display:inline-block; font-size:11px; font-weight:600; padding:1px 7px; border-radius:999px; }
+  .tag.bad { background:var(--badbg); color:var(--bad); } .tag.win { background:var(--winbg); color:var(--win); } .tag.rec { background:var(--warnbg); color:var(--warn); }
+  .verdict { background:var(--winbg); border-color:transparent; margin-bottom:14px; }
+  .verdict .big { font-size:28px; font-weight:700; }
+  table { border-collapse:collapse; width:100%; } td, th { text-align:left; padding:7px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  .num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .cheap { background:var(--winbg); }
+  details summary { cursor:pointer; }
+  ul { margin:6px 0; padding-left:18px; }
+  dialog { border:1px solid var(--line); border-radius:12px; padding:18px; max-width:760px; width:94vw; background:var(--card); color:var(--ink); }
+  dialog::backdrop { background:rgba(0,0,0,.35); }
+  .cand label { display:block; padding:3px 0; font-size:14px; }
+  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Grocery compare</h1>
+  <div id="notices"></div>
+  <div id="deals"></div>
+  <div class="grid">
+    <div>
+      <div class="card">
+        <h2>Paste the family's list</h2>
+        <textarea id="paste" placeholder="e.g.&#10;amul ghee 1 litre&#10;amul butter 500g&#10;pyaaz 1 kg"></textarea>
+        <div class="row" style="margin-top:10px">
+          <button class="primary" id="go">Compare</button>
+          <button id="weekly">Load weekly staples</button>
+        </div>
+        <div class="small muted" id="status" style="margin-top:8px"></div>
+      </div>
+      <div class="card" style="margin-top:14px" id="needs" hidden></div>
+    </div>
+    <div id="result"></div>
+  </div>
+</div>
+
+<dialog id="confirm">
+  <h2 id="cTitle">Confirm Item</h2>
+  <div class="row"><input type="text" id="cName" placeholder="Item name, e.g. Tata Salt" style="flex:1"><input type="text" id="cQty" placeholder="usual qty, e.g. 1 kg" style="width:140px"><button id="cSearch">Search apps</button></div>
+  <p class="small muted">Pick the listing that is <i>our</i> Item on each app — tick every pack size you'd accept. You do this once per Item.</p>
+  <div id="cApps"></div>
+  <div class="row small" style="margin:10px 0">
+    <label><input type="checkbox" id="cAny"> Any brand is fine</label>
+    <label><input type="checkbox" id="cStaple"> Track as a staple</label>
+    <label>Pin container <input type="text" id="cPin" placeholder="e.g. tin" style="width:90px"></label>
+  </div>
+  <div class="row"><button class="primary" id="cSave">Save</button><button id="cCancel">Cancel</button><span class="small" id="cMsg"></span></div>
+</dialog>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+const rupee = (n) => '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+let state = { items: [], appNames: {} };
+let editing = null;
+
+async function api(path, body) {
+  const res = await fetch(path, body ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } : {});
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || res.statusText);
+  return data;
+}
+
+async function loadState() {
+  state = await api('/api/state');
+  $('notices').innerHTML = state.notices.map((n) => `<div class="notice">${esc(n)}</div>`).join('');
+  $('deals').innerHTML = state.deals.length
+    ? `<div class="deals"><b>Deals on your Items</b><ul>${state.deals.map((d) => `<li>${esc(d.text)}</li>`).join('')}</ul></div>` : '';
+  renderNeeds([]);
+}
+
+function renderNeeds(newLines) {
+  const apps = Object.keys(state.appNames);
+  const unmatched = state.items.map((i) => ({ i, missing: apps.filter((a) => !i.listings[a]) })).filter((x) => x.missing.length);
+  if (!newLines.length && !unmatched.length) { $('needs').hidden = true; return; }
+  $('needs').hidden = false;
+  $('needs').innerHTML = `<h2>Needs you</h2>
+    ${newLines.map((l) => `<div class="row small" style="margin:4px 0"><b>${esc(l.text)}</b> is new <button data-new="${esc(l.text)}">Confirm</button></div>`).join('')}
+    ${unmatched.map(({ i, missing }) => `<div class="row small" style="margin:4px 0">${esc(i.name)} — not matched on ${missing.map((a) => state.appNames[a]).join(', ')} <button data-item="${esc(i.id)}">Match</button></div>`).join('')}`;
+  $('needs').querySelectorAll('[data-new]').forEach((b) => (b.onclick = () => openConfirm({ name: b.dataset.new })));
+  $('needs').querySelectorAll('[data-item]').forEach((b) => (b.onclick = () => openConfirm(state.items.find((i) => i.id === b.dataset.item))));
+}
+
+function fillText(fill) {
+  if (fill.kind === 'unavailable') return `<span class="tag bad">${fill.reason === 'out-of-stock' ? 'out of stock' : 'not matched'}</span>`;
+  const packs = fill.packs.map((p) => `${esc(p.listing.size)} × ${p.count}`).join(' + ');
+  return `${rupee(fill.cost)}<div class="small muted">${packs}${fill.kind === 'closest' ? ' · closest pack' : ''}</div>`;
+}
+
+function renderResult(r) {
+  const c = r.comparison, names = state.appNames, v = c.verdict;
+  const checkedApps = c.apps.filter((a) => a.status === 'checked');
+  const itemName = (id) => state.items.find((i) => i.id === id)?.name ?? id;
+  const sourceTag = (app) => r.sources[app] !== 'live' ? ' <span class="tag rec">recorded prices</span>' : '';
+  const dealFor = (app, itemId) => r.deals.find((d) => d.app === app && d.itemId === itemId);
+
+  let banner = '';
+  if (v) {
+    const ru = v.runnerUp;
+    banner = `<div class="card verdict">
+      <div class="small" style="color:var(--win); font-weight:600">${v.tie ? 'PRACTICALLY A TIE' : 'CHEAPEST FOR THIS BASKET'}${v.incomplete ? ' · no app has every Item' : ''}</div>
+      <div class="big">${esc(names[v.app])} · ${rupee(v.basketPrice)}</div>
+      <div>${ru ? (v.tie ? `${esc(names[ru.app])} is only ${rupee(ru.gap)} more — small handling fees could swing it.` : `${rupee(ru.gap)} less than ${esc(names[ru.app])}.`) : 'Only one app could be checked.'} <span class="small muted">Item prices only; delivery is free above ~₹199.</span></div>
+      <div class="row" style="margin-top:10px"><button class="primary" id="pick">Pick list for ${esc(names[v.app])}</button></div>
+      <div id="picklist" hidden style="margin-top:10px"></div>
+    </div>`;
+  }
+  const appsCard = `<div class="card" style="margin-bottom:14px"><h2>All apps</h2><table>
+    ${c.apps.map((a) => a.status === 'checked'
+      ? `<tr><td><b>${esc(names[a.app])}</b>${sourceTag(a.app)}${a.missingItemIds.length && a.missingItemIds.length < a.lines.length ? `<div class="small muted">missing: ${a.missingItemIds.map(itemName).map(esc).join(', ')}</div>` : ''}</td>
+           <td class="num">${a.missingItemIds.length === a.lines.length ? '<span class="small muted">no Items matched yet</span>' : rupee(a.basketPrice)}</td>
+           <td><details><summary class="small">lines</summary><div class="small">${a.lines.map((l) => `${esc(itemName(l.itemId))}: ${fillText(l.fill)}${dealFor(a.app, l.itemId) ? ' <span class="tag win">deal</span>' : ''}`).join('<br>')}</div></details></td></tr>`
+      : `<tr><td><b>${esc(names[a.app])}</b></td><td class="num"><span class="tag bad">couldn't check</span></td><td class="small muted">${esc(a.reason)}</td></tr>`).join('')}
+  </table></div>`;
+  const worth = (c.worthKnowing.length || c.splitNote) ? `<div class="card" style="margin-bottom:14px"><h2>Worth knowing</h2><ul class="small">
+    ${c.worthKnowing.map((w) => `<li>${esc(w)}</li>`).join('')}${c.splitNote ? `<li>${esc(c.splitNote)}</li>` : ''}</ul></div>` : '';
+  const ids = (checkedApps[0]?.lines ?? []).map((l) => l.itemId);
+  const grid = checkedApps.length ? `<details class="card"><summary><b>Per line</b></summary><table style="margin-top:8px">
+    <tr><th>Item</th>${checkedApps.map((a) => `<th class="num">${esc(names[a.app])}</th>`).join('')}</tr>
+    ${ids.map((id) => {
+      const costs = checkedApps.map((a) => a.lines.find((l) => l.itemId === id)?.fill).map((f) => f && f.kind !== 'unavailable' ? f.cost : Infinity);
+      const min = Math.min(...costs);
+      return `<tr><td>${esc(itemName(id))}</td>${checkedApps.map((a, k) => `<td class="num ${costs[k] === min && min < Infinity ? 'cheap' : ''}">${fillText(a.lines.find((l) => l.itemId === id).fill)}</td>`).join('')}</tr>`;
+    }).join('')}</table></details>` : '';
+  $('result').innerHTML = banner + appsCard + worth + grid;
+
+  if (v) $('pick').onclick = () => {
+    const app = c.apps.find((a) => a.app === v.app);
+    const text = app.pickList.join('\n');
+    $('picklist').hidden = false;
+    $('picklist').innerHTML = `<ul class="small">${app.pickList.map((p) => `<li>${esc(p)}</li>`).join('')}</ul><button id="copy">Copy list</button>`;
+    $('copy').onclick = () => navigator.clipboard.writeText(text).then(() => ($('copy').textContent = 'Copied'));
+  };
+  renderNeeds(r.newLines);
+}
+
+$('go').onclick = async () => {
+  $('go').disabled = true;
+  $('status').textContent = 'Checking each app at a gentle pace — this can take a minute…';
+  try {
+    const r = await api('/api/compare', { text: $('paste').value });
+    renderResult(r);
+    $('status').textContent = r.needQuantity.length ? `No quantity for: ${r.needQuantity.map((l) => l.text).join(', ')}` : '';
+    loadState().then(() => renderNeeds(r.newLines));
+  } catch (e) { $('status').textContent = 'Failed: ' + e.message; }
+  $('go').disabled = false;
+};
+
+$('weekly').onclick = () => {
+  const fmt = (q) => !q ? '' : q.unit === 'pcs' ? `${q.amount} pcs` : q.amount >= 1000 ? `${q.amount / 1000} ${q.unit === 'g' ? 'kg' : 'l'}` : `${q.amount} ${q.unit}`;
+  $('paste').value = state.items.filter((i) => i.staple).map((i) => `${i.name} ${fmt(i.usualQuantity)}`).join('\n');
+};
+
+// ---- confirm panel ----
+function openConfirm(item) {
+  editing = item.id ? item : null;
+  $('cTitle').textContent = editing ? `Match "${item.name}" on more apps` : 'New Item';
+  $('cName').value = item.name ?? '';
+  $('cQty').value = '';
+  $('cAny').checked = !!item.anyBrand; $('cStaple').checked = !!item.staple; $('cPin').value = item.pinnedContainer ?? '';
+  $('cApps').innerHTML = ''; $('cMsg').textContent = '';
+  $('confirm').showModal();
+  if (item.name) search();
+}
+async function search() {
+  $('cApps').innerHTML = '<p class="small muted">Searching each app…</p>';
+  const res = await api('/api/candidates', { query: $('cName').value });
+  $('cApps').innerHTML = Object.entries(res).map(([app, r]) => `<div class="cand" style="margin:8px 0"><b>${esc(state.appNames[app])}</b>
+    ${r.error ? `<div class="small muted">${esc(r.error)}</div>` : ''}
+    ${r.listings.map((l, k) => `<label><input type="checkbox" data-app="${app}" value="${esc(l.listingId)}" ${editing?.listings[app]?.includes(l.listingId) ? 'checked' : ''}> ${esc(l.name)} · ${esc(l.size)} · ${rupee(l.price)}${l.inStock ? '' : ' · out of stock'}</label>`).join('')}
+    <label class="small muted"><input type="checkbox" data-app="${app}" value="__none__"> not sold on ${esc(state.appNames[app])}</label></div>`).join('');
+}
+$('cSearch').onclick = search;
+$('cCancel').onclick = () => $('confirm').close();
+$('cSave').onclick = async () => {
+  const listings = {};
+  $('cApps').querySelectorAll('input[type=checkbox]:checked').forEach((b) => {
+    listings[b.dataset.app] ??= [];
+    if (b.value !== '__none__') listings[b.dataset.app].push(b.value);
+  });
+  const m = $('cQty').value.toLowerCase().match(/(\d+(?:\.\d+)?)\s*(kg|g|l|ltr|ml|pcs)/);
+  const usualQuantity = m ? ({ kg: { amount: m[1] * 1000, unit: 'g' }, g: { amount: +m[1], unit: 'g' }, l: { amount: m[1] * 1000, unit: 'ml' }, ltr: { amount: m[1] * 1000, unit: 'ml' }, ml: { amount: +m[1], unit: 'ml' }, pcs: { amount: +m[1], unit: 'pcs' } })[m[2]] : undefined;
+  try {
+    await api('/api/items', { id: editing?.id, name: $('cName').value, anyBrand: $('cAny').checked, staple: $('cStaple').checked, pinnedContainer: $('cPin').value, usualQuantity, listings });
+    $('confirm').close();
+    await loadState();
+  } catch (e) { $('cMsg').textContent = e.message; }
+};
+
+loadState();
+</script>
+</body>
+</html>

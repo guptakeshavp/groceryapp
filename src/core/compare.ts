@@ -114,8 +114,8 @@ async function checkOneApp(adapter: PlatformAdapter, input: CompareInput, worthK
 
 function noteCaveats(appName: string, item: Item, line: BasketLine, family: Listing[], fill: FillResult, out: string[], notConfirmed: boolean): void {
   if (fill.kind === 'unavailable') {
-    const why = fill.reason === 'out-of-stock' ? 'out of stock' : notConfirmed ? 'not matched yet — confirm it' : 'not sold';
-    out.push(`${item.name}: ${why} on ${appName}`);
+    // Unmatched Items are listed once in "Needs you", not per line here.
+    if (!notConfirmed) out.push(`${item.name}: ${fill.reason === 'out-of-stock' ? 'out of stock' : 'not sold'} on ${appName}`);
     return;
   }
   if (fill.kind === 'closest') {
