@@ -63,7 +63,7 @@ export class Governor {
     return {
       app: adapter.app,
       search: (q) => call(() => adapter.search(q)),
-      getListings: (ids) => call(() => adapter.getListings(ids)),
+      getListings: (ids, query) => call(() => adapter.getListings(ids, query)),
       authStatus: () => adapter.authStatus(), // local check of stored tokens/session; not a request to the app
     };
   }

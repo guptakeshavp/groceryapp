@@ -86,7 +86,7 @@ export class ZeptoAdapter implements PlatformAdapter {
       }));
   }
 
-  async getListings(listingIds: string[]): Promise<Listing[]> {
+  async getListings(listingIds: string[], _query?: string): Promise<Listing[]> {
     await this.ensureHome();
     const out: Listing[] = [];
     for (const id of listingIds) {

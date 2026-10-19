@@ -40,7 +40,7 @@ export async function backgroundSweep(opts: {
       if (!first) await opts.clock.sleep(TRICKLE_MS);
       first = false;
       try {
-        const listings: Listing[] = await adapter.getListings(ids);
+        const listings: Listing[] = await adapter.getListings(ids, item.name);
         opts.history.record(item.id, raw.app, listings, opts.clock.now());
         report.checked++;
       } catch (e) {

@@ -7,7 +7,10 @@ import type { AppId, AuthStatus, Listing } from '../domain/types.ts';
 export interface PlatformAdapter {
   readonly app: AppId;
   search(query: string): Promise<Listing[]>;
-  /** Current price and stock for confirmed listings. Unknown ids are simply absent. */
-  getListings(listingIds: string[]): Promise<Listing[]>;
+  /**
+   * Current price and stock for one Item's confirmed listings. `query` (the Item's name) lets apps without
+   * a lookup-by-id re-find them by search. Unknown ids are simply absent.
+   */
+  getListings(listingIds: string[], query: string): Promise<Listing[]>;
   authStatus(): Promise<AuthStatus>;
 }

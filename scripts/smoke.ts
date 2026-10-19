@@ -1,17 +1,19 @@
 // Manual smoke test of a real adapter (spec: Testing Decisions). Read-only.
-// Usage: node scripts/smoke.ts zepto "amul cow ghee"
+// Usage: node scripts/smoke.ts zepto|instamart "amul cow ghee"
 // Prints the first few listings and saves the raw listings under data/smoke/ for fixtures.
 import { mkdirSync, writeFileSync } from 'node:fs';
+import { InstamartAdapter } from '../src/adapters/instamart.ts';
 import { ZeptoAdapter } from '../src/adapters/zepto.ts';
 
 const [app = '', query = 'amul cow ghee'] = process.argv.slice(2);
 const HOME_PIN = '380015';
 
-if (app !== 'zepto') {
-  console.error('Usage: node scripts/smoke.ts zepto "<query>"');
+const adapters = { zepto: () => new ZeptoAdapter({ homePincode: HOME_PIN }), instamart: () => new InstamartAdapter({ homePincode: HOME_PIN }) };
+if (!(app in adapters)) {
+  console.error('Usage: node scripts/smoke.ts zepto|instamart "<query>"');
   process.exit(2);
 }
-const adapter = new ZeptoAdapter({ homePincode: HOME_PIN });
+const adapter = adapters[app as keyof typeof adapters]();
 try {
   const listings = await adapter.search(query);
   mkdirSync('data/smoke', { recursive: true });

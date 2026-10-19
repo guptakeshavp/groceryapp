@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
+import { INSTAMART_ALLOWED_TOOLS } from '../src/adapters/instamart.ts';
 import { ZEPTO_ALLOWED_TOOLS } from '../src/adapters/zepto.ts';
 import { parsePackSize } from '../src/domain/size.ts';
 import type { Listing } from '../src/domain/types.ts';
@@ -23,4 +24,11 @@ test('parses the pack formats Zepto returns (real search, 2026-10-19)', () => {
   for (const l of listings) assert.ok(parsePackSize(l.size), `could not parse "${l.size}"`);
   assert.deepEqual(parsePackSize('1 pc (500 ml)'), { amount: 500, unit: 'ml' });
   assert.deepEqual(parsePackSize('1 pack (1 L)'), { amount: 1000, unit: 'ml' });
+});
+
+test('the Instamart session refuses cart, checkout, payment and address-changing tools', async () => {
+  const session = new McpSession({ name: 'im-test', url: 'https://example.invalid/im', allowedTools: INSTAMART_ALLOWED_TOOLS, dataDir: '/nonexistent' });
+  for (const tool of ['update_cart', 'clear_cart', 'checkout', 'confirm_order', 'create_address', 'delete_address', 'get_payment_options', 'get_cart']) {
+    await assert.rejects(session.call(tool, {}), /not on the read-only allowlist/);
+  }
 });

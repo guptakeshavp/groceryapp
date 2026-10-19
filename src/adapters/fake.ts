@@ -35,8 +35,8 @@ export class FakeAdapter implements PlatformAdapter {
     return this.opts.listings.filter((l) => words.every((w) => `${l.brand ?? ''} ${l.name}`.toLowerCase().includes(w)));
   }
 
-  async getListings(ids: string[]): Promise<Listing[]> {
-    this.enter('getListings', [ids]);
+  async getListings(ids: string[], query = ''): Promise<Listing[]> {
+    this.enter('getListings', [ids, query]);
     return this.opts.listings.filter((l) => ids.includes(l.listingId));
   }
 

@@ -80,15 +80,21 @@ async function checkOneApp(adapter: PlatformAdapter, input: CompareInput, worthK
     const auth = await adapter.authStatus();
     if (auth.state === 'expired') return { app, status: 'couldnt-check', reason: 'login expired' };
 
-    const wantedIds = input.basket.flatMap((line) => input.catalogue.get(line.itemId)?.listings[app] ?? []);
-    const current = new Map((await adapter.getListings(wantedIds)).map((l) => [l.listingId, l]));
+    // One lookup per Item (sequential; the governor paces them).
+    const current = new Map<string, Listing>();
+    for (const line of input.basket) {
+      const item = mustGet(input.catalogue, line.itemId);
+      const ids = item.listings[app];
+      if (!ids?.length) continue;
+      for (const l of await adapter.getListings(ids, item.name)) current.set(l.listingId, l);
+    }
 
     const lines: LineResult[] = input.basket.map((line) => {
       const item = mustGet(input.catalogue, line.itemId);
       const family = (item.listings[app] ?? []).map((id) => current.get(id)).filter((l): l is Listing => !!l);
       input.history?.record(item.id, app, family, input.now ?? new Date());
       const fill = fillQuantity(family, line.quantity, item.pinnedContainer);
-      noteCaveats(APP_NAMES[app], item, line, family, fill, worthKnowing);
+      noteCaveats(APP_NAMES[app], item, line, family, fill, worthKnowing, item.listings[app] === undefined);
       return { itemId: line.itemId, fill };
     });
     return {
@@ -106,9 +112,10 @@ async function checkOneApp(adapter: PlatformAdapter, input: CompareInput, worthK
   }
 }
 
-function noteCaveats(appName: string, item: Item, line: BasketLine, family: Listing[], fill: FillResult, out: string[]): void {
+function noteCaveats(appName: string, item: Item, line: BasketLine, family: Listing[], fill: FillResult, out: string[], notConfirmed: boolean): void {
   if (fill.kind === 'unavailable') {
-    out.push(`${item.name}: ${fill.reason === 'out-of-stock' ? 'out of stock' : 'not sold'} on ${appName}`);
+    const why = fill.reason === 'out-of-stock' ? 'out of stock' : notConfirmed ? 'not matched yet — confirm it' : 'not sold';
+    out.push(`${item.name}: ${why} on ${appName}`);
     return;
   }
   if (fill.kind === 'closest') {

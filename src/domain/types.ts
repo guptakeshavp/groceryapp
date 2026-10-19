@@ -38,7 +38,12 @@ export interface Item {
   /** e.g. "tin" — when set, only listings whose pack mentions it count. */
   pinnedContainer?: string;
   staple: boolean;
-  /** Confirmed listing family per app: the same product in each pack size/container Keshav accepted. */
+  /** Used when a pasted line gives no quantity. */
+  usualQuantity?: Quantity;
+  /**
+   * Confirmed listing family per app: the same product in each pack size/container Keshav accepted.
+   * Absent = not matched on that app yet; [] = confirmed as not sold there.
+   */
   listings: Partial<Record<AppId, string[]>>;
 }
 
