@@ -94,7 +94,7 @@ Alongside, the tool quietly tracks a short list of staples once a day while the 
 ### Platform adapters (one module per app, one shared interface)
 Every app is reached through an adapter with the same interface, so everything above it is platform-agnostic. The interface is **read-only**: it has no cart, checkout or order operations at all.
 - **search(query) → listings** for the home store: name, brand (if separate), pack size, selling price, MRP, in-stock, app listing id.
-- **get listings(ids) → listings**: current price and stock for confirmed listings.
+- **get listings(ids, Item name) → listings**: current price and stock for one Item's confirmed listings; the name lets apps without lookup-by-id (Instamart, the Chrome sites) re-find them by search.
 - **auth status**: logged in, expiring at (if known), expired.
 
 | App | Access | Search and current prices |

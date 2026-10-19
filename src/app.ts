@@ -1,5 +1,7 @@
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import type { PlatformAdapter } from './adapters/adapter.ts';
+import { BigBasketAdapter, BlinkitAdapter, ChromeSession, profileDir } from './adapters/chrome.ts';
 import { FakeAdapter } from './adapters/fake.ts';
 import { InstamartAdapter } from './adapters/instamart.ts';
 import { ZeptoAdapter } from './adapters/zepto.ts';
@@ -141,12 +143,16 @@ export class GroceryApp {
 }
 
 function defaultSources(dataDir: string): AppSource[] {
-  const recorded = `replaying prices recorded on ${RECORDED_ON} until the automated Chrome is set up`;
+  const recorded = `replaying prices recorded on ${RECORDED_ON} until the automated Chrome is set up (npm run chrome-setup)`;
+  const chromeReady = existsSync(profileDir(dataDir));
+  const chrome = new ChromeSession(dataDir);
+  const site = (live: PlatformAdapter, app: 'blinkit' | 'bigbasket'): AppSource =>
+    chromeReady ? { adapter: live, source: 'live' } : { adapter: new FakeAdapter({ app, listings: recordedListings(app) }), source: recorded };
   return [
     { adapter: new ZeptoAdapter({ homePincode: HOME_PIN, dataDir }), source: 'live' },
     { adapter: new InstamartAdapter({ homePincode: HOME_PIN, dataDir }), source: 'live' },
-    { adapter: new FakeAdapter({ app: 'blinkit', listings: recordedListings('blinkit') }), source: recorded },
-    { adapter: new FakeAdapter({ app: 'bigbasket', listings: recordedListings('bigbasket') }), source: recorded },
+    site(new BlinkitAdapter(chrome), 'blinkit'),
+    site(new BigBasketAdapter(chrome), 'bigbasket'),
   ];
 }
 
