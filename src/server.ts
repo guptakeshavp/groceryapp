@@ -54,7 +54,7 @@ const server = createServer(async (req, res) => {
       }
     }
     if (req.method === 'GET' && url.pathname === '/api/state') {
-      return send(res, 200, { deals: app.deals(), notices: await app.notices(), items: app.items(), appNames: APP_NAMES, apps: app.apps() });
+      return send(res, 200, { deals: app.deals(), notices: await app.notices(), items: app.items(), appNames: APP_NAMES, apps: app.apps(), lastSweep: app.lastSweep });
     }
     if (req.method === 'POST' && url.pathname === '/api/compare') {
       const { text } = await body(req);
@@ -74,3 +74,15 @@ const server = createServer(async (req, res) => {
 });
 
 server.listen(PORT, '127.0.0.1', () => console.log(`Grocery compare: http://localhost:${PORT}`));
+
+// Daily staple checks: shortly after start, then hourly; only staples unchecked for ~24 h are looked up.
+const SWEEP_EVERY_MS = 3600_000;
+const runSweep = () =>
+  app.sweep().then(
+    (r) => r && (r.checked || r.skipped.length) && console.log(`Staple check: ${r.checked} checked, ${r.skipped.length} skipped`),
+    (e) => console.error('Staple check failed:', e instanceof Error ? e.message : e),
+  );
+if (process.env.NO_SWEEP !== '1') {
+  setTimeout(runSweep, 60_000);
+  setInterval(runSweep, SWEEP_EVERY_MS);
+}

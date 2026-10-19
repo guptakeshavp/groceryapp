@@ -14,7 +14,7 @@ import { emptyGovernorState, Governor, type GovernorState } from './core/governo
 import { emptyHistory, type HistoryState, PriceHistory } from './core/history.ts';
 import { type ListParser, type ParsedLine, RuleListParser } from './core/list-parser.ts';
 import { defaultProposer, type MatchProposer, type Proposal } from './core/match-proposer.ts';
-import { MAX_STAPLES } from './core/tracker.ts';
+import { backgroundSweep, MAX_STAPLES, type SweepReport } from './core/tracker.ts';
 import { catalogue as seedCatalogue, RECORDED_ON, recordedListings } from './demo/seed.ts';
 import { APP_NAMES, type AppId, type BasketLine, type Item, type Listing, type Quantity } from './domain/types.ts';
 import { JsonFileStore, type Store } from './store/json-store.ts';
@@ -46,6 +46,8 @@ export class GroceryApp {
   readonly governor: Governor;
   private readonly parser: ListParser;
   readonly proposer: MatchProposer;
+  private sweeping = false;
+  lastSweep: (SweepReport & { at: string }) | undefined;
   readonly sources: AppSource[];
   /** BigBasket, read through Keshav's own captures (it blocks the automated profile). */
   readonly bigbasketAssist: AssistedAdapter;
@@ -107,6 +109,28 @@ export class GroceryApp {
     if (listings.length === 0) throw new Error('no products found on this page — wait for results to load');
     this.bigbasketAssist.capture(query, listings);
     return { query, count: listings.length };
+  }
+
+  /**
+   * Quiet daily staple check (spec: tracking). Live apps only — recorded replays and BigBasket captures
+   * aren't fetched; Instamart is skipped inside backgroundSweep. Never overlaps itself.
+   */
+  async sweep(): Promise<SweepReport | undefined> {
+    if (this.sweeping) return undefined;
+    this.sweeping = true;
+    try {
+      const report = await backgroundSweep({
+        items: this.items(),
+        adapters: this.sources.filter((s) => s.source === 'live').map((s) => s.adapter),
+        governor: this.governor,
+        history: this.history,
+        clock: this.clock,
+      });
+      this.lastSweep = { ...report, at: this.clock.now().toISOString() };
+      return report;
+    } finally {
+      this.sweeping = false;
+    }
   }
 
   deals(): Deal[] {

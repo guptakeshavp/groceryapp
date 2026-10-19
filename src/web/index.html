@@ -95,6 +95,7 @@ async function loadState() {
   $('notices').innerHTML = state.notices.map((n) => `<div class="notice">${esc(n)}</div>`).join('');
   $('deals').innerHTML = state.deals.length
     ? `<div class="deals"><b>Deals on your Items</b><ul>${state.deals.map((d) => `<li>${esc(d.text)}</li>`).join('')}</ul></div>` : '';
+  if (state.lastSweep) $('status').textContent ||= `Staples last checked ${new Date(state.lastSweep.at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}.`;
   renderNeeds([]);
 }
 
