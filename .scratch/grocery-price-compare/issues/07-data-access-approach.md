@@ -18,3 +18,8 @@ Resolved 2026-10-19 by grilling with Keshav.
 4. **Platforms in v1: five** — Zepto, Instamart, Blinkit, BigBasket, Flipkart Minutes (Minutes confirmed serving 380015). **Amazon Fresh deferred** past v1; addable later via the same Chrome mechanism.
 5. **Failure handling:** one gentle retry after a short pause, then show the comparison with the failed app marked "couldn't check" plus the reason (e.g. "login expired"). Never block the whole comparison; never retry-loop.
 6. **Code to borrow:** `quick-commerce-mcp` (MIT) for BigBasket/Blinkit/Zepto adapters. `compari5` (no licence) and `sasta-signals` (licence to be checked before any copying) as approach references only.
+
+## Revised 2026-10-19 (during the build)
+
+- **BigBasket is assisted, not automated.** Its listing API returns HTTP 403 to the automated Chrome profile (bot protection keyed on the automation flag), though login and address were set. The tool does **not** disguise the automation. Keshav chose option B: he opens BigBasket searches in his normal Chrome (one tab per Item, opened by the app) and clicks a "Send to grocery compare" bookmark; captures stay fresh for 6 hours. The capture endpoint accepts posts only from `https://www.bigbasket.com`.
+- **Blinkit and Flipkart Minutes work through the automated Chrome**, verified live at the home address. Stable ids: Blinkit's product id (cards' `id`), Flipkart's `pid` where a card links to one.

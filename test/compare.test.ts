@@ -120,3 +120,10 @@ test('the adapter seam is read-only: no cart, checkout or order operations', () 
   const methods = Object.getOwnPropertyNames(Object.getPrototypeOf(blinkit()));
   assert.ok(!methods.some((m) => /cart|order|checkout|place|pay/i.test(m)), methods.join(', '));
 });
+
+test('a confirmed listing that vanished (renamed/delisted) asks for a re-match instead of claiming "not sold"', async () => {
+  const listings = realListings('blinkit').filter((l) => !l.listingId.includes('amul-cow-ghee'));
+  const c = await compareBasket({ basket: weeklyBasket(), catalogue: catalogue(), adapters: [blinkit({ listings }), bigbasket()] });
+  assert.deepEqual(line(c, 'blinkit', 'ghee'), { kind: 'unavailable', reason: 'listing-gone' });
+  assert.ok(c.worthKnowing.includes('Amul Cow Ghee: confirmed listing not found (renamed or delisted?) — re-match it on Blinkit'));
+});

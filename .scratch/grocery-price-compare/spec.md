@@ -102,7 +102,7 @@ Every app is reached through an adapter with the same interface, so everything a
 | Zepto | Official MCP `mcp.zepto.co.in` (OAuth phone OTP, localhost callback, dynamic client registration; the **`tools:read` scope is enough** — verified 2026-10-19) | MCP `select_saved_address` for the home address, then `search_products` / `search_multiple_products` / `get_product_details` |
 | Instamart | Official MCP `mcp.swiggy.com/im`, Personal Use path (access token 5 days, rotating refresh token 30 days sliding) | MCP `search_products` (MRP, offer price, stock) at the saved home address |
 | Blinkit | One dedicated automated Chrome profile on the Mac, home address set | The site's own search data |
-| BigBasket | Same Chrome profile, logged in, home address 380015 | The site's own search data |
+| BigBasket | **Assisted** (revised 2026-10-19): BigBasket's listing API returns 403 to the automated profile, so Keshav captures search pages from his normal Chrome with a "Send to grocery compare" bookmark; fresh for 6 h; posts accepted only from bigbasket.com | His captures |
 | Flipkart Minutes | Same Chrome profile, home address set in Minutes (hyperlocal) mode | The site's own search data |
 
 - **MCP tool allowlist.** MCP adapters may call only the read tools they need (Zepto: `list_saved_addresses`, `select_saved_address`, `get_location_serviceability`, `search_products`, `search_multiple_products`, `get_product_details`, `get_past_order_items`; Instamart's equivalents). Zepto's server also exposes `update_cart` and four order-placing tools (`create_order`, `create_online_payment_order`, `create_wallet_order`, `create_upi_reserve_pay_order`); the adapter must refuse any tool not on its allowlist. — [ordering](issues/13-ordering.md)

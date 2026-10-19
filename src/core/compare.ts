@@ -93,7 +93,12 @@ async function checkOneApp(adapter: PlatformAdapter, input: CompareInput, worthK
       const item = mustGet(input.catalogue, line.itemId);
       const family = (item.listings[app] ?? []).map((id) => current.get(id)).filter((l): l is Listing => !!l);
       input.history?.record(item.id, app, family, input.now ?? new Date());
-      const fill = fillQuantity(family, line.quantity, item.pinnedContainer);
+      const confirmed = item.listings[app] ?? [];
+      // Confirmed on this app, but none of those listings came back: renamed or delisted — needs re-matching.
+      const fill: FillResult =
+        confirmed.length > 0 && family.length === 0
+          ? { kind: 'unavailable', reason: 'listing-gone' }
+          : fillQuantity(family, line.quantity, item.pinnedContainer);
       noteCaveats(APP_NAMES[app], item, line, family, fill, worthKnowing, item.listings[app] === undefined);
       return { itemId: line.itemId, fill };
     });
@@ -115,7 +120,9 @@ async function checkOneApp(adapter: PlatformAdapter, input: CompareInput, worthK
 function noteCaveats(appName: string, item: Item, line: BasketLine, family: Listing[], fill: FillResult, out: string[], notConfirmed: boolean): void {
   if (fill.kind === 'unavailable') {
     // Unmatched Items are listed once in "Needs you", not per line here.
-    if (!notConfirmed) out.push(`${item.name}: ${fill.reason === 'out-of-stock' ? 'out of stock' : 'not sold'} on ${appName}`);
+    if (notConfirmed) return;
+    const why = fill.reason === 'out-of-stock' ? 'out of stock' : fill.reason === 'listing-gone' ? 'confirmed listing not found (renamed or delisted?) — re-match it' : 'not sold';
+    out.push(`${item.name}: ${why} on ${appName}`);
     return;
   }
   if (fill.kind === 'closest') {

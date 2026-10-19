@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BigBasket helper</title>
+<style>
+  :root { --bg:#f6f5f2; --card:#fff; --ink:#1d1d1b; --muted:#6b6a66; --line:#e3e1dc; --win:#0f7b4f; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#161614; --card:#20201d; --ink:#ecebe7; --muted:#a3a19b; --line:#34332f; --win:#5fd39b; } }
+  body { margin:0; font:15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width:640px; margin:0 auto; padding:24px 16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px; }
+  a.bm { display:inline-block; background:var(--win); color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none; font-weight:600; margin:10px 0; }
+  ol li { margin:6px 0; } .muted { color:var(--muted); font-size:13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>BigBasket helper</h1>
+  <div class="card">
+    <p>BigBasket blocks automated browsers, so you read its prices yourself. This bookmark sends the prices on the BigBasket page you're looking at to Grocery compare on this Mac. It reads that page only, and sends nothing anywhere else.</p>
+    <p><b>1.</b> Drag this to your bookmarks bar:</p>
+    <a class="bm" id="bm" href="#">Send to grocery compare</a>
+    <ol start="2">
+      <li>In Grocery compare, click <b>Open BigBasket searches</b>. One BigBasket tab opens per Item.</li>
+      <li>On each tab, once the results show, click the bookmark. A green note confirms it.</li>
+      <li>Compare again. Captures stay fresh for 6 hours.</li>
+    </ol>
+    <p class="muted">The first time, Chrome may ask whether bigbasket.com may access devices on your local network. Allow it, because that's how the bookmark reaches this app.</p>
+  </div>
+</div>
+<script>
+  const code = `(()=>{const note=(m,ok)=>{const b=document.createElement('div');b.textContent='Grocery compare: '+m;b.style.cssText='position:fixed;top:12px;right:12px;z-index:2147483647;padding:10px 14px;border-radius:8px;font:14px sans-serif;color:#fff;background:'+(ok?'#0f7b4f':'#b3261e');document.body.appendChild(b);setTimeout(()=>b.remove(),5000)};fetch('${location.origin}/api/assist/bigbasket',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:location.href,text:document.body.innerText})}).then(r=>r.json()).then(d=>d.error?note(d.error,false):note('saved '+d.count+' prices for “'+d.query+'”',true)).catch(e=>note('could not reach the app — is it running? ('+e.message+')',false))})()`;
+  document.getElementById('bm').href = 'javascript:' + encodeURIComponent(code);
+  document.getElementById('bm').onclick = (e) => { e.preventDefault(); alert('Drag this button to your bookmarks bar instead of clicking it here.'); };
+</script>
+</body>
+</html>

@@ -9,7 +9,7 @@ export interface PackPick {
 export type FillResult =
   | { kind: 'filled'; packs: PackPick[]; amount: number; cost: number; mixedUnits: boolean }
   | { kind: 'closest'; packs: PackPick[]; amount: number; cost: number; perKg: number; mixedUnits: boolean }
-  | { kind: 'unavailable'; reason: 'none-confirmed' | 'out-of-stock' };
+  | { kind: 'unavailable'; reason: 'none-confirmed' | 'out-of-stock' | 'listing-gone' };
 
 /** A fill may overshoot the wanted quantity by at most this factor before we fall back to "closest pack". */
 const MAX_OVERSHOOT = 1.5;

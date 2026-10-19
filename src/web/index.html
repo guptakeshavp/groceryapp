@@ -81,6 +81,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&':'&amp;', '<'
 const rupee = (n) => '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 2 });
 let state = { items: [], appNames: {}, apps: [] };
 let editing = null;
+let gone = new Set(); // "<app>:<itemId>" whose confirmed listing vanished in the last comparison
 
 async function api(path, body) {
   const res = await fetch(path, body ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } : {});
@@ -99,7 +100,7 @@ async function loadState() {
 
 function renderNeeds(newLines) {
   const apps = state.apps;
-  const unmatched = state.items.map((i) => ({ i, missing: apps.filter((a) => !i.listings[a]) })).filter((x) => x.missing.length);
+  const unmatched = state.items.map((i) => ({ i, missing: apps.filter((a) => !i.listings[a] || gone.has(`${a}:${i.id}`)) })).filter((x) => x.missing.length);
   if (!newLines.length && !unmatched.length) { $('needs').hidden = true; return; }
   $('needs').hidden = false;
   $('needs').innerHTML = `<h2>Needs you</h2>
@@ -110,7 +111,7 @@ function renderNeeds(newLines) {
 }
 
 function fillText(fill) {
-  if (fill.kind === 'unavailable') return `<span class="tag bad">${fill.reason === 'out-of-stock' ? 'out of stock' : 'not matched'}</span>`;
+  if (fill.kind === 'unavailable') return `<span class="tag bad">${({ 'out-of-stock': 'out of stock', 'listing-gone': 're-match' })[fill.reason] ?? 'not matched'}</span>`;
   const packs = fill.packs.map((p) => `${esc(p.listing.size)} × ${p.count}`).join(' + ');
   return `${rupee(fill.cost)}<div class="small muted">${packs}${fill.kind === 'closest' ? ' · closest pack' : ''}</div>`;
 }
@@ -119,7 +120,7 @@ function renderResult(r) {
   const c = r.comparison, names = state.appNames, v = c.verdict;
   const checkedApps = c.apps.filter((a) => a.status === 'checked');
   const itemName = (id) => state.items.find((i) => i.id === id)?.name ?? id;
-  const sourceTag = (app) => r.sources[app] !== 'live' ? ' <span class="tag rec">recorded prices</span>' : '';
+  const sourceTag = (app) => r.sources[app] === 'live' ? '' : /^assisted/.test(r.sources[app]) ? ' <span class="tag rec">your capture</span>' : ' <span class="tag rec">recorded prices</span>';
   const dealFor = (app, itemId) => r.deals.find((d) => d.app === app && d.itemId === itemId);
 
   let banner = '';
@@ -138,7 +139,7 @@ function renderResult(r) {
       ? `<tr><td><b>${esc(names[a.app])}</b>${sourceTag(a.app)}${a.missingItemIds.length && a.missingItemIds.length < a.lines.length ? `<div class="small muted">missing: ${a.missingItemIds.map(itemName).map(esc).join(', ')}</div>` : ''}</td>
            <td class="num">${a.missingItemIds.length === a.lines.length ? '<span class="small muted">no Items matched yet</span>' : rupee(a.basketPrice)}</td>
            <td><details><summary class="small">lines</summary><div class="small">${a.lines.map((l) => `${esc(itemName(l.itemId))}: ${fillText(l.fill)}${dealFor(a.app, l.itemId) ? ' <span class="tag win">deal</span>' : ''}`).join('<br>')}</div></details></td></tr>`
-      : `<tr><td><b>${esc(names[a.app])}</b></td><td class="num"><span class="tag bad">couldn't check</span></td><td class="small muted">${esc(a.reason)}</td></tr>`).join('')}
+      : `<tr><td><b>${esc(names[a.app])}</b></td><td class="num"><span class="tag bad">couldn't check</span></td><td class="small muted">${esc(a.reason)}${/needs your capture/.test(a.reason) ? ` <div class="row" style="margin-top:6px"><button class="small" id="bbOpen">Open BigBasket searches</button> <a class="small" href="/helper" target="_blank">set up the helper bookmark</a></div>` : ''}</td></tr>`).join('')}
   </table></div>`;
   const worth = (c.worthKnowing.length || c.splitNote) ? `<div class="card" style="margin-bottom:14px"><h2>Worth knowing</h2><ul class="small">
     ${c.worthKnowing.map((w) => `<li>${esc(w)}</li>`).join('')}${c.splitNote ? `<li>${esc(c.splitNote)}</li>` : ''}</ul></div>` : '';
@@ -152,6 +153,10 @@ function renderResult(r) {
     }).join('')}</table></details>` : '';
   $('result').innerHTML = banner + appsCard + worth + grid;
 
+  if ($('bbOpen')) $('bbOpen').onclick = () => {
+    for (const it of r.basketItems) window.open(`https://www.bigbasket.com/ps/?q=${encodeURIComponent(it.name)}`, '_blank');
+    $('status').textContent = 'Click the "Send to grocery compare" bookmark on each BigBasket tab, then Compare again.';
+  };
   if (v) $('pick').onclick = () => {
     const app = c.apps.find((a) => a.app === v.app);
     const text = app.pickList.join('\n');
@@ -159,6 +164,7 @@ function renderResult(r) {
     $('picklist').innerHTML = `<ul class="small">${app.pickList.map((p) => `<li>${esc(p)}</li>`).join('')}</ul><button id="copy">Copy list</button>`;
     $('copy').onclick = () => navigator.clipboard.writeText(text).then(() => ($('copy').textContent = 'Copied'));
   };
+  gone = new Set(c.apps.filter((a) => a.status === 'checked').flatMap((a) => a.lines.filter((l) => l.fill.kind === 'unavailable' && l.fill.reason === 'listing-gone').map((l) => `${a.app}:${l.itemId}`)));
   renderNeeds(r.newLines);
 }
 

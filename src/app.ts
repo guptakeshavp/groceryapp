@@ -1,8 +1,10 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import type { PlatformAdapter } from './adapters/adapter.ts';
-import { BigBasketAdapter, BlinkitAdapter, ChromeSession, MinutesAdapter, profileDir } from './adapters/chrome.ts';
+import { BlinkitAdapter, ChromeSession, MinutesAdapter, profileDir } from './adapters/chrome.ts';
+import { AssistedAdapter, type AssistedState, emptyAssisted } from './adapters/assisted.ts';
 import { FakeAdapter } from './adapters/fake.ts';
+import { parseBigBasketText } from './adapters/page-parsers.ts';
 import { InstamartAdapter } from './adapters/instamart.ts';
 import { ZeptoAdapter } from './adapters/zepto.ts';
 import { type Clock, systemClock } from './core/clock.ts';
@@ -17,6 +19,7 @@ import { APP_NAMES, type AppId, type BasketLine, type Item, type Listing, type Q
 import { JsonFileStore, type Store } from './store/json-store.ts';
 
 export const HOME_PIN = '380015';
+export const ASSISTED = 'assisted — capture prices with the BigBasket helper bookmark (http://localhost:4321/helper)';
 
 export interface AppSource {
   adapter: PlatformAdapter;
@@ -26,6 +29,7 @@ export interface AppSource {
 
 export interface CompareResponse {
   comparison: Comparison;
+  basketItems: { id: string; name: string }[];
   newLines: ParsedLine[];
   /** Lines matched to an Item but with no quantity and no usual quantity. */
   needQuantity: ParsedLine[];
@@ -41,6 +45,8 @@ export class GroceryApp {
   readonly governor: Governor;
   private readonly parser: ListParser;
   readonly sources: AppSource[];
+  /** BigBasket, read through Keshav's own captures (it blocks the automated profile). */
+  readonly bigbasketAssist: AssistedAdapter;
 
   constructor(opts: { dataDir?: string; clock?: Clock; sources?: AppSource[]; parser?: ListParser } = {}) {
     const dataDir = opts.dataDir ?? 'data';
@@ -49,7 +55,8 @@ export class GroceryApp {
     this.history = new PriceHistory(new JsonFileStore<HistoryState>(join(dataDir, 'history.json'), emptyHistory()));
     this.governor = new Governor(this.clock, new JsonFileStore<GovernorState>(join(dataDir, 'governor.json'), emptyGovernorState()));
     this.parser = opts.parser ?? new RuleListParser();
-    this.sources = opts.sources ?? defaultSources(dataDir);
+    this.bigbasketAssist = new AssistedAdapter('bigbasket', new JsonFileStore<AssistedState>(join(dataDir, 'assisted.json'), emptyAssisted()), this.clock);
+    this.sources = opts.sources ?? defaultSources(dataDir, this.bigbasketAssist);
   }
 
   /** Live apps go through the governor; recorded replays touch no site, so they aren't paced. */
@@ -81,11 +88,22 @@ export class GroceryApp {
     });
     return {
       comparison,
+      basketItems: basket.map((l) => ({ id: l.itemId, name: items.find((i) => i.id === l.itemId)?.name ?? l.itemId })),
       newLines: parsed.filter((l) => !l.itemId),
       needQuantity: parsed.filter((l) => l.itemId && !l.quantity),
       deals: this.deals(),
       sources: Object.fromEntries(this.sources.map((s) => [s.adapter.app, s.source])),
     };
+  }
+
+  /** What the BigBasket bookmark sent from Keshav's own browser. */
+  captureBigBasket(pageUrl: string, text: string): { query: string; count: number } {
+    const query = new URL(pageUrl).searchParams.get('q');
+    if (!query) throw new Error('open a BigBasket search results page first');
+    const listings = parseBigBasketText(text);
+    if (listings.length === 0) throw new Error('no products found on this page — wait for results to load');
+    this.bigbasketAssist.capture(query, listings);
+    return { query, count: listings.length };
   }
 
   deals(): Deal[] {
@@ -142,7 +160,7 @@ export class GroceryApp {
   }
 }
 
-function defaultSources(dataDir: string): AppSource[] {
+function defaultSources(dataDir: string, bigbasket: AssistedAdapter): AppSource[] {
   const recorded = `replaying prices recorded on ${RECORDED_ON} until the automated Chrome is set up (npm run chrome-setup)`;
   const chromeReady = existsSync(profileDir(dataDir));
   const chrome = new ChromeSession(dataDir);
@@ -152,7 +170,7 @@ function defaultSources(dataDir: string): AppSource[] {
     { adapter: new ZeptoAdapter({ homePincode: HOME_PIN, dataDir }), source: 'live' },
     { adapter: new InstamartAdapter({ homePincode: HOME_PIN, dataDir }), source: 'live' },
     site(new BlinkitAdapter(chrome), 'blinkit'),
-    site(new BigBasketAdapter(chrome), 'bigbasket'),
+    { adapter: bigbasket, source: ASSISTED },
     ...(chromeReady ? [{ adapter: new MinutesAdapter(chrome), source: 'live' }] : []),
   ];
 }
