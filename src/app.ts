@@ -13,6 +13,7 @@ import { type Deal, findDeals } from './core/deals.ts';
 import { emptyGovernorState, Governor, type GovernorState } from './core/governor.ts';
 import { emptyHistory, type HistoryState, PriceHistory } from './core/history.ts';
 import { type ListParser, type ParsedLine, RuleListParser } from './core/list-parser.ts';
+import { defaultProposer, type MatchProposer, type Proposal } from './core/match-proposer.ts';
 import { MAX_STAPLES } from './core/tracker.ts';
 import { catalogue as seedCatalogue, RECORDED_ON, recordedListings } from './demo/seed.ts';
 import { APP_NAMES, type AppId, type BasketLine, type Item, type Listing, type Quantity } from './domain/types.ts';
@@ -44,17 +45,19 @@ export class GroceryApp {
   readonly history: PriceHistory;
   readonly governor: Governor;
   private readonly parser: ListParser;
+  readonly proposer: MatchProposer;
   readonly sources: AppSource[];
   /** BigBasket, read through Keshav's own captures (it blocks the automated profile). */
   readonly bigbasketAssist: AssistedAdapter;
 
-  constructor(opts: { dataDir?: string; clock?: Clock; sources?: AppSource[]; parser?: ListParser } = {}) {
+  constructor(opts: { dataDir?: string; clock?: Clock; sources?: AppSource[]; parser?: ListParser; proposer?: MatchProposer } = {}) {
     const dataDir = opts.dataDir ?? 'data';
     this.clock = opts.clock ?? systemClock;
     this.catalogueStore = new JsonFileStore(join(dataDir, 'catalogue.json'), { items: [...seedCatalogue().values()] });
     this.history = new PriceHistory(new JsonFileStore<HistoryState>(join(dataDir, 'history.json'), emptyHistory()));
     this.governor = new Governor(this.clock, new JsonFileStore<GovernorState>(join(dataDir, 'governor.json'), emptyGovernorState()));
     this.parser = opts.parser ?? new RuleListParser();
+    this.proposer = opts.proposer ?? defaultProposer();
     this.bigbasketAssist = new AssistedAdapter('bigbasket', new JsonFileStore<AssistedState>(join(dataDir, 'assisted.json'), emptyAssisted()), this.clock);
     this.sources = opts.sources ?? defaultSources(dataDir, this.bigbasketAssist);
   }
@@ -124,19 +127,30 @@ export class GroceryApp {
     return out;
   }
 
-  /** Per-app candidates for a new or unmatched Item (spec: Item confirmation panel). */
-  async candidates(query: string): Promise<Record<string, { listings: Listing[]; error?: string }>> {
-    const out: Record<string, { listings: Listing[]; error?: string }> = {};
+  /** Per-app candidates for a new or unmatched Item, with proposed matches pre-ticked (spec: Item confirmation panel). */
+  async candidates(query: string, anyBrand = false): Promise<{
+    apps: Record<string, { listings: Listing[]; error?: string }>;
+    proposals: Partial<Record<AppId, Proposal>>;
+    proposer: string;
+    proposerError?: string;
+  }> {
+    const apps: Record<string, { listings: Listing[]; error?: string }> = {};
     await Promise.all(
       this.sources.map(async (s) => {
         try {
-          out[s.adapter.app] = { listings: (await this.governed(s).search(query)).slice(0, 8) };
+          apps[s.adapter.app] = { listings: (await this.governed(s).search(query)).slice(0, 8) };
         } catch (e) {
-          out[s.adapter.app] = { listings: [], error: e instanceof Error ? e.message : String(e) };
+          apps[s.adapter.app] = { listings: [], error: e instanceof Error ? e.message : String(e) };
         }
       }),
     );
-    return out;
+    const candidates = Object.fromEntries(Object.entries(apps).map(([app, r]) => [app, r.listings]));
+    try {
+      return { apps, proposals: await this.proposer.propose({ itemName: query, anyBrand, candidates }), proposer: this.proposer.kind };
+    } catch (e) {
+      // Never block matching on the proposer: fall back to Keshav ticking by hand.
+      return { apps, proposals: {}, proposer: this.proposer.kind, proposerError: e instanceof Error ? e.message : String(e) };
+    }
   }
 
   /** Save a confirmed Item (new, or more apps for an existing one). */

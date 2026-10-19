@@ -198,11 +198,17 @@ function openConfirm(item) {
 }
 async function search() {
   $('cApps').innerHTML = '<p class="small muted">Searching each app…</p>';
-  const res = await api('/api/candidates', { query: $('cName').value });
-  $('cApps').innerHTML = Object.entries(res).map(([app, r]) => `<div class="cand" style="margin:8px 0"><b>${esc(state.appNames[app])}</b>
+  const res = await api('/api/candidates', { query: $('cName').value, anyBrand: $('cAny').checked });
+  const who = res.proposer === 'claude' ? 'Claude' : 'Simple rules';
+  // Pre-tick: existing confirmations win; otherwise the proposal.
+  // An existing confirmation counts only if one of its listings is still on show (renames break old ids).
+  const live = (app) => (editing?.listings[app] ?? []).some((id) => res.apps[app]?.listings.some((l) => l.listingId === id));
+  const ticked = (app, id) => live(app) ? editing.listings[app].includes(id) : !!res.proposals[app]?.listingIds.includes(id);
+  $('cApps').innerHTML = `<p class="small muted">${who} pre-ticked its best guess${res.proposerError ? ` (failed: ${esc(res.proposerError)} — tick by hand)` : ''}. Check before saving.</p>` +
+    Object.entries(res.apps).map(([app, r]) => { const p = res.proposals[app]; return `<div class="cand" style="margin:8px 0"><b>${esc(state.appNames[app])}</b>${p?.note ? ` <span class="small muted">— ${esc(p.note)}</span>` : ''}
     ${r.error ? `<div class="small muted">${esc(r.error)}</div>` : ''}
-    ${r.listings.map((l, k) => `<label><input type="checkbox" data-app="${app}" value="${esc(l.listingId)}" ${editing?.listings[app]?.includes(l.listingId) ? 'checked' : ''}> ${esc(l.name)} · ${esc(l.size)} · ${rupee(l.price)}${l.inStock ? '' : ' · out of stock'}</label>`).join('')}
-    <label class="small muted"><input type="checkbox" data-app="${app}" value="__none__"> not sold on ${esc(state.appNames[app])}</label></div>`).join('');
+    ${r.listings.map((l) => `<label><input type="checkbox" data-app="${app}" value="${esc(l.listingId)}" ${ticked(app, l.listingId) ? 'checked' : ''}> ${esc(l.name)} · ${esc(l.size)} · ${rupee(l.price)}${l.inStock ? '' : ' · out of stock'}</label>`).join('')}
+    <label class="small muted"><input type="checkbox" data-app="${app}" value="__none__" ${(editing?.listings[app]?.length === 0) || (!live(app) && p?.notSold) ? 'checked' : ''}> not sold on ${esc(state.appNames[app])}</label></div>`; }).join('');
 }
 $('cSearch').onclick = search;
 $('cCancel').onclick = () => $('confirm').close();

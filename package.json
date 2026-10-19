@@ -19,6 +19,7 @@
     "typescript": "5.9.3"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "0.131.0",
     "@modelcontextprotocol/sdk": "1.31.0",
     "playwright-core": "1.63.0"
   }

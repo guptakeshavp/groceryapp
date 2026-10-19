@@ -61,8 +61,8 @@ const server = createServer(async (req, res) => {
       return send(res, 200, await app.compare(String(text ?? '')));
     }
     if (req.method === 'POST' && url.pathname === '/api/candidates') {
-      const { query } = await body(req);
-      return send(res, 200, await app.candidates(String(query ?? '')));
+      const { query, anyBrand } = await body(req);
+      return send(res, 200, await app.candidates(String(query ?? ''), anyBrand === true));
     }
     if (req.method === 'POST' && url.pathname === '/api/items') {
       return send(res, 200, app.saveItem((await body(req)) as unknown as Parameters<GroceryApp['saveItem']>[0]));
