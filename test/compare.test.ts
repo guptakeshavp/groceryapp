@@ -108,19 +108,10 @@ describe('failures', () => {
     assert.equal(c.verdict?.app, 'bigbasket');
   });
 
-  test('one gentle retry: a single block is absorbed', async () => {
-    const b = blinkit({ failures: { getListings: [new AdapterError('blank', 'empty results page')] } });
-    const c = await compareBasket({ basket: weeklyBasket(), catalogue: catalogue(), adapters: [b] });
-    checked(c, 'blinkit');
-    assert.equal(b.called('getListings'), 2);
-  });
-
-  test("blocked twice: couldn't check, and no third attempt", async () => {
-    const block = () => new AdapterError('rate-limited', 'HTTP 429', 45);
-    const b = blinkit({ failures: { getListings: [block(), block()] } });
+  test("a block that survives the governor's retry: couldn't check, with the reason, ranked last", async () => {
+    const b = blinkit({ failures: { getListings: [new AdapterError('rate-limited', 'HTTP 429', 45)] } });
     const c = await compareBasket({ basket: weeklyBasket(), catalogue: catalogue(), adapters: [b, bigbasket()] });
     assert.equal(failed(c, 'blinkit').reason, 'rate-limited (retry after 45 s)');
-    assert.equal(b.called('getListings'), 2);
     assert.equal(c.apps.at(-1)?.app, 'blinkit');
   });
 });

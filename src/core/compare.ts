@@ -41,7 +41,10 @@ export interface Comparison {
   splitNote?: string;
 }
 
-/** Compare a basket across apps by item prices only (spec: "Basket price (no fees)"). Read-only on every app. */
+/**
+ * Compare a basket across apps by item prices only (spec: "Basket price (no fees)"). Read-only on every app.
+ * Pass adapters wrapped by the Governor: pacing, caps and the one gentle retry live there.
+ */
 export async function compareBasket(input: CompareInput): Promise<Comparison> {
   const worthKnowing: string[] = [];
   const results = await Promise.all(input.adapters.map((a) => checkOneApp(a, input, worthKnowing)));
@@ -70,11 +73,11 @@ export async function compareBasket(input: CompareInput): Promise<Comparison> {
 async function checkOneApp(adapter: PlatformAdapter, input: CompareInput, worthKnowing: string[]): Promise<AppResult> {
   const app = adapter.app;
   try {
-    const auth = await withOneRetry(() => adapter.authStatus());
+    const auth = await adapter.authStatus();
     if (auth.state === 'expired') return { app, status: 'couldnt-check', reason: 'login expired' };
 
     const wantedIds = input.basket.flatMap((line) => input.catalogue.get(line.itemId)?.listings[app] ?? []);
-    const current = new Map((await withOneRetry(() => adapter.getListings(wantedIds))).map((l) => [l.listingId, l]));
+    const current = new Map((await adapter.getListings(wantedIds)).map((l) => [l.listingId, l]));
 
     const lines: LineResult[] = input.basket.map((line) => {
       const item = mustGet(input.catalogue, line.itemId);
@@ -140,21 +143,11 @@ function splitNote(basket: BasketLine[], checked: Checked[], verdict: Verdict | 
   return `Splitting across ${used.map((a) => APP_NAMES[a.app]).join(' + ')} would cost ₹${splitPrice} — ₹${saving} less than ${APP_NAMES[verdict.app]} alone, for ${used.length} deliveries.`;
 }
 
-/** One gentle retry for blocks/blanks/rate limits (spec: request governor). Login expiry is not retried. */
-async function withOneRetry<T>(call: () => Promise<T>): Promise<T> {
-  try {
-    return await call();
-  } catch (e) {
-    if (e instanceof AdapterError && e.kind === 'login-expired') throw e;
-    return await call();
-  }
-}
-
 function describe(e: unknown): string {
   if (e instanceof AdapterError) {
     if (e.kind === 'login-expired') return 'login expired';
     if (e.kind === 'rate-limited') return `rate-limited${e.retryAfterSec ? ` (retry after ${e.retryAfterSec} s)` : ''}`;
-    if (e.kind === 'daily-limit') return 'daily limit';
+    if (e.kind === 'daily-limit') return e.message;
     return `${e.kind}: ${e.message}`;
   }
   return e instanceof Error ? e.message : String(e);
