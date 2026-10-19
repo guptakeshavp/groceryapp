@@ -70,6 +70,30 @@ export class FileOAuthProvider implements OAuthClientProvider {
     console.log(`\nOpening the login page in your browser. Log in there with your phone number and OTP.\nIf it doesn't open: ${url.href}\n`);
     execFile('open', [url.href]);
   }
+  /**
+   * When this login stops working without Keshav. Access tokens refresh themselves; what ends a login is the
+   * refresh token's lifetime (Swiggy: 30 days, sliding — each refresh re-saves the tokens). Unknown lifetime
+   * with a refresh token = no predicted expiry.
+   */
+  loginExpiry(refreshLifetimeDays?: number): { state: 'ok' | 'expired'; expiresAt?: Date } {
+    const { tokens, tokensSavedAt } = this.read();
+    if (!tokens) return { state: 'expired' };
+    const saved = tokensSavedAt ? new Date(tokensSavedAt).getTime() : Date.now();
+    let expiresAt: number | undefined;
+    if (tokens.refresh_token) {
+      if (refreshLifetimeDays) expiresAt = saved + refreshLifetimeDays * 86_400_000;
+    } else if (tokens.expires_in) {
+      expiresAt = saved + tokens.expires_in * 1000;
+    }
+    if (expiresAt !== undefined && expiresAt <= Date.now()) return { state: 'expired', expiresAt: new Date(expiresAt) };
+    return { state: 'ok', expiresAt: expiresAt === undefined ? undefined : new Date(expiresAt) };
+  }
+
+  /** Forget tokens so the next connect starts a fresh login on the app's own page. */
+  forgetTokens(): void {
+    this.write({ tokens: undefined, tokensSavedAt: undefined });
+  }
+
   saveCodeVerifier(codeVerifier: string): void {
     this.write({ codeVerifier });
   }

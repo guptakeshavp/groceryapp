@@ -92,7 +92,14 @@ async function api(path, body) {
 
 async function loadState() {
   state = await api('/api/state');
-  $('notices').innerHTML = state.notices.map((n) => `<div class="notice">${esc(n)}</div>`).join('');
+  $('notices').innerHTML = state.logins.map((l) => `<div class="notice row" style="justify-content:space-between">
+      <span>${esc(state.appNames[l.app])}: ${l.state === 'expired' ? 'login expired' : `login expires ${new Date(l.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`}</span>
+      <button class="small" data-login="${l.app}">Log in again</button></div>`).join('')
+    + state.notices.map((n) => `<div class="notice">${esc(n)}</div>`).join('');
+  $('notices').querySelectorAll('[data-login]').forEach((b) => (b.onclick = async () => {
+    b.disabled = true; b.textContent = 'Log in on the page that opened (type your OTP there)…';
+    try { await api('/api/login/' + b.dataset.login, {}); await loadState(); } catch (e) { b.textContent = 'Failed: ' + e.message; }
+  }));
   $('deals').innerHTML = state.deals.length
     ? `<div class="deals"><b>Deals on your Items</b><ul>${state.deals.map((d) => `<li>${esc(d.text)}</li>`).join('')}</ul></div>` : '';
   if (state.lastSweep) $('status').textContent ||= `Staples last checked ${new Date(state.lastSweep.at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}.`;

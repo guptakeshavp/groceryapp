@@ -37,11 +37,11 @@ export class InstamartAdapter implements PlatformAdapter {
   constructor(opts: { homePincode: string; dataDir?: string; session?: McpSession }) {
     this.homePincode = opts.homePincode;
     this.session =
-      opts.session ?? new McpSession({ name: 'instamart', url: 'https://mcp.swiggy.com/im', allowedTools: INSTAMART_ALLOWED_TOOLS, dataDir: opts.dataDir });
+      opts.session ?? new McpSession({ name: 'instamart', url: 'https://mcp.swiggy.com/im', allowedTools: INSTAMART_ALLOWED_TOOLS, dataDir: opts.dataDir, refreshLifetimeDays: 30 }); // Swiggy docs: 30-day sliding refresh
   }
 
   async authStatus(): Promise<AuthStatus> {
-    return this.session.hasLogin() ? { state: 'ok' } : { state: 'expired' };
+    return this.session.loginStatus();
   }
 
   private async home(): Promise<string> {

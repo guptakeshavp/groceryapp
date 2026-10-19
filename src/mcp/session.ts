@@ -15,7 +15,10 @@ export class McpSession {
   private readonly allowed: ReadonlySet<string>;
   private client: Client | undefined;
 
-  constructor(opts: { name: string; url: string; allowedTools: string[]; dataDir?: string }) {
+  private readonly refreshLifetimeDays: number | undefined;
+
+  constructor(opts: { name: string; url: string; allowedTools: string[]; dataDir?: string; refreshLifetimeDays?: number }) {
+    this.refreshLifetimeDays = opts.refreshLifetimeDays;
     this.url = opts.url;
     this.provider = new FileOAuthProvider(opts.name, opts.dataDir);
     this.allowed = new Set(opts.allowedTools);
@@ -25,9 +28,13 @@ export class McpSession {
     return !!this.provider.tokens();
   }
 
+  loginStatus(): { state: 'ok' | 'expired'; expiresAt?: Date } {
+    return this.provider.loginExpiry(this.refreshLifetimeDays);
+  }
+
   private async connect(): Promise<Client> {
     if (this.client) return this.client;
-    if (!this.hasLogin()) throw new AdapterError('login-expired', 'not logged in');
+    if (this.loginStatus().state === 'expired') throw new AdapterError('login-expired', 'login expired');
     const client = new Client({ name: 'grocery-compare', version: '0.1.0' });
     try {
       await client.connect(new StreamableHTTPClientTransport(new URL(this.url), { authProvider: this.provider }));

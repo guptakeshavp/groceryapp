@@ -14,6 +14,7 @@ import { emptyGovernorState, Governor, type GovernorState } from './core/governo
 import { emptyHistory, type HistoryState, PriceHistory } from './core/history.ts';
 import { type ListParser, type ParsedLine, RuleListParser } from './core/list-parser.ts';
 import { defaultProposer, type MatchProposer, type Proposal } from './core/match-proposer.ts';
+import { interactiveLogin, MCP_SERVERS, type McpApp } from './mcp/login.ts';
 import { backgroundSweep, MAX_STAPLES, type SweepReport } from './core/tracker.ts';
 import { catalogue as seedCatalogue, RECORDED_ON, recordedListings } from './demo/seed.ts';
 import { APP_NAMES, type AppId, type BasketLine, type Item, type Listing, type Quantity } from './domain/types.ts';
@@ -47,6 +48,8 @@ export class GroceryApp {
   private readonly parser: ListParser;
   readonly proposer: MatchProposer;
   private sweeping = false;
+  private loggingIn: string | undefined;
+  private readonly dataDir: string;
   lastSweep: (SweepReport & { at: string }) | undefined;
   readonly sources: AppSource[];
   /** BigBasket, read through Keshav's own captures (it blocks the automated profile). */
@@ -54,6 +57,7 @@ export class GroceryApp {
 
   constructor(opts: { dataDir?: string; clock?: Clock; sources?: AppSource[]; parser?: ListParser; proposer?: MatchProposer } = {}) {
     const dataDir = opts.dataDir ?? 'data';
+    this.dataDir = dataDir;
     this.clock = opts.clock ?? systemClock;
     this.catalogueStore = new JsonFileStore(join(dataDir, 'catalogue.json'), { items: [...seedCatalogue().values()] });
     this.history = new PriceHistory(new JsonFileStore<HistoryState>(join(dataDir, 'history.json'), emptyHistory()));
@@ -137,10 +141,38 @@ export class GroceryApp {
     return findDeals(this.items(), this.history, this.clock.now());
   }
 
+  /** Apps whose login has expired or will within 3 days (spec: advance warning), for the "Log in again" button. */
+  async logins(): Promise<{ app: AppId; state: 'expired' | 'expiring'; expiresAt?: string }[]> {
+    const out: { app: AppId; state: 'expired' | 'expiring'; expiresAt?: string }[] = [];
+    const soon = this.clock.now().getTime() + 3 * 86_400_000;
+    for (const s of this.sources) {
+      const a = await s.adapter.authStatus();
+      const expiresAt = 'expiresAt' in a && a.expiresAt ? a.expiresAt : undefined;
+      if (a.state === 'expired') out.push({ app: s.adapter.app, state: 'expired' });
+      else if (expiresAt && expiresAt.getTime() < soon) out.push({ app: s.adapter.app, state: 'expiring', expiresAt: expiresAt.toISOString() });
+    }
+    return out;
+  }
+
+  /** Opens the app's own login page; Keshav types the OTP there. One login at a time (one callback port). */
+  async login(app: AppId): Promise<void> {
+    if (!(app in MCP_SERVERS)) throw new Error(`${APP_NAMES[app]} has no login here — it's set up with npm run chrome-setup`);
+    if (this.loggingIn) throw new Error(`already waiting for the ${this.loggingIn} login`);
+    this.loggingIn = app;
+    try {
+      const client = await interactiveLogin(app as McpApp, { dataDir: this.dataDir, fresh: true });
+      await client.close();
+      // Drop the adapter's old connection so it reconnects with the new tokens.
+      const adapter = this.sources.find((s) => s.adapter.app === app)?.adapter as { close?: () => Promise<void> } | undefined;
+      await adapter?.close?.();
+    } finally {
+      this.loggingIn = undefined;
+    }
+  }
+
   async notices(): Promise<string[]> {
     const out: string[] = [];
     for (const s of this.sources) {
-      if ((await s.adapter.authStatus()).state === 'expired') out.push(`${APP_NAMES[s.adapter.app]}: login expired — log in again`);
       if (s.source !== 'live') out.push(`${APP_NAMES[s.adapter.app]}: ${s.source}`);
     }
     for (const app of this.governor.persistentlyBlocked()) {

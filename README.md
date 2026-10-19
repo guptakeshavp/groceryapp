@@ -26,7 +26,15 @@ npm start            # http://localhost:4321
 
 Until `chrome-setup` has been run, Blinkit replays prices recorded on 2026-10-19, and the app labels them as recorded.
 
-Logins are stored under `data/`, which is git-ignored. You type OTPs yourself on each app's own page; the tool never sees them.
+Logins are stored under `data/`, which is git-ignored. You type OTPs yourself on each app's own page; the tool never sees them. When a login has expired, or will within 3 days (Instamart: 30 days after last use), the start screen shows **Log in again**.
+
+### Optional: Claude match suggestions
+
+When you match an Item, the panel arrives with a best guess already ticked. With Anthropic credentials (`ANTHROPIC_API_KEY` in the environment when you `npm start`), Claude (`claude-opus-5-5`) makes the guess. It's good with renames and variants, such as "Pasteurised Butter" being Amul's ordinary salted butter. Without credentials, simple word-matching rules make it instead. Either way you confirm every match.
+
+### Daily staple checks
+
+While the app is running, staples not checked in about 24 hours are re-checked quietly, about once a day, on Zepto, Blinkit and Flipkart Minutes. Instamart is excluded by Swiggy's data rule, and BigBasket needs your captures. This builds the price history that the "Deals on your Items" strip uses. Set `NO_SWEEP=1` to turn it off.
 
 ## Develop
 

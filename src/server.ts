@@ -54,7 +54,13 @@ const server = createServer(async (req, res) => {
       }
     }
     if (req.method === 'GET' && url.pathname === '/api/state') {
-      return send(res, 200, { deals: app.deals(), notices: await app.notices(), items: app.items(), appNames: APP_NAMES, apps: app.apps(), lastSweep: app.lastSweep });
+      return send(res, 200, { deals: app.deals(), notices: await app.notices(), logins: await app.logins(), items: app.items(), appNames: APP_NAMES, apps: app.apps(), lastSweep: app.lastSweep });
+    }
+    if (req.method === 'POST' && url.pathname.startsWith('/api/login/')) {
+      const target = url.pathname.slice('/api/login/'.length) as Parameters<GroceryApp['login']>[0];
+      // Returns once the OTP login finishes in the browser (up to 5 minutes).
+      await app.login(target);
+      return send(res, 200, { ok: true });
     }
     if (req.method === 'POST' && url.pathname === '/api/compare') {
       const { text } = await body(req);

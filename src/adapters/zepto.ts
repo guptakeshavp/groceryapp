@@ -56,7 +56,7 @@ export class ZeptoAdapter implements PlatformAdapter {
   }
 
   async authStatus(): Promise<AuthStatus> {
-    return this.session.hasLogin() ? { state: 'ok' } : { state: 'expired' };
+    return this.session.loginStatus();
   }
 
   /** Pin the session to the saved home address so prices are the home dark store's. */
