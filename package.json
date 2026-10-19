@@ -8,10 +8,14 @@
   },
   "scripts": {
     "test": "node --test \"test/**/*.test.ts\"",
-    "typecheck": "tsc -p ."
+    "typecheck": "tsc -p .",
+    "probe": "node scripts/mcp-probe.ts"
   },
   "devDependencies": {
     "@types/node": "24.10.1",
     "typescript": "5.9.3"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.31.0"
   }
 }

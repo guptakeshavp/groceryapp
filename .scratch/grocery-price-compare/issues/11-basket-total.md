@@ -24,3 +24,12 @@ Resolved 2026-10-19 by grilling with Keshav.
 5. **Estimates:** item prices + the fee lines from that app's last real bill, labelled "estimated (fees as of <date>)". No prior bill → items only, marked "fees unknown".
 
 **Verify during build:** whether Zepto's preview itemises handling/small-cart fees; whether Minutes' guest cart shows fees; whether Instamart MCP prices match the app.
+
+## Revised 2026-10-19 (supersedes the answer above)
+
+Decided by Keshav while the build started, after the Zepto probe showed its only fee preview lives inside the order-placing tool (`create_order` with `confirmOrder:false`): **delivery fees aren't a concern — every app's free-delivery threshold (~₹199) is below a normal basket.** So:
+
+1. **Compare item prices only.** The total per app is the cheapest real-pack fill of every line. No cart, bill or checkout total is read on any app.
+2. **No cart is ever touched; the tool is read-only on every app.** The empty-cart guard and the "replace or estimate?" prompt are gone.
+3. **Small fees are ignored** (Instamart/Blinkit handling ≈ ₹4–12). When the top two apps are within **₹15**, the verdict says "practically a tie" rather than naming a winner.
+4. **Dropped:** fee memory, estimates, "fees unknown", and the coupon note.

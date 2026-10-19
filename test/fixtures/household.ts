@@ -63,22 +63,18 @@ export const weeklyBasket = (): BasketLine[] => [
   { itemId: 'onion', quantity: { amount: 1000, unit: 'g' } },
 ];
 
-export const blinkit = (o: Partial<FakeAdapterOptions> = {}) =>
-  new FakeAdapter({ app: 'blinkit', listings: realListings('blinkit'), fees: [{ label: 'Delivery', amount: 0 }, { label: 'Handling', amount: 9 }], ...o });
+export const blinkit = (o: Partial<FakeAdapterOptions> = {}) => new FakeAdapter({ app: 'blinkit', listings: realListings('blinkit'), ...o });
 
-export const bigbasket = (o: Partial<FakeAdapterOptions> = {}) =>
-  new FakeAdapter({ app: 'bigbasket', listings: realListings('bigbasket'), usesRealCart: true, fees: [{ label: 'Delivery', amount: 0 }], ...o });
+export const bigbasket = (o: Partial<FakeAdapterOptions> = {}) => new FakeAdapter({ app: 'bigbasket', listings: realListings('bigbasket'), ...o });
 
 /**
- * Synthetic Instamart: no real Instamart capture exists yet. Same products as Blinkit with
- * illustrative prices, a real-cart app like the real one.
+ * Synthetic Instamart: no real Instamart capture exists yet. Mirrors Blinkit's listings
+ * with each price changed by `priceDelta(listing)` (default +₹7 per pack).
  */
-export const instamart = (o: Partial<FakeAdapterOptions> = {}) =>
+export const instamart = (o: Partial<FakeAdapterOptions> = {}, priceDelta: (l: Listing) => number = () => 7) =>
   new FakeAdapter({
     app: 'instamart',
-    usesRealCart: true,
-    listings: realListings('blinkit').map((l) => ({ ...l, app: 'instamart' as const, listingId: l.listingId.replace('blinkit:', 'instamart:'), price: l.price + 7 })),
-    fees: [{ label: 'Delivery', amount: 0 }, { label: 'Handling', amount: 9 }],
+    listings: realListings('blinkit').map((l) => ({ ...l, app: 'instamart' as const, listingId: l.listingId.replace('blinkit:', 'instamart:'), price: l.price + priceDelta(l) })),
     ...o,
   });
 

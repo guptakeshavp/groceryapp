@@ -16,3 +16,7 @@ Resolved 2026-10-19 by grilling with Keshav.
 2. **Instamart and BigBasket handoff:** the comparison leaves the basket in Keshav's real account carts, which sync to the phone app. The result screen says so ("Your basket is in your Instamart cart").
 3. **Blinkit, Zepto and Flipkart Minutes handoff:** a **pick list** with the exact listing, container and pack count per line (e.g. "Amul Cow Ghee pouch 1 L × 1", "Amul Salted Butter 100 g × 5"). It stays on the Mac screen while Keshav orders on his phone, and "Copy list" works for WhatsApp, e.g. when a family member orders instead. No automatic cart filling in v1.
 4. The verdict banner's "Open <app>" action (from "What does the basket screen look like?") becomes this per-app handoff.
+
+## Revised 2026-10-19
+
+Follows the revision of "How does the tool get each app's all-in basket total?": no cart is touched, so **every app's handoff is the pick list** (Instamart and BigBasket included). Still never places orders.

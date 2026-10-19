@@ -1,115 +1,77 @@
-import type { CartLine, PlatformAdapter } from '../adapters/adapter.ts';
+import type { PlatformAdapter } from '../adapters/adapter.ts';
 import { formatQuantity, parsePackSize } from '../domain/size.ts';
-import { AdapterError, APP_NAMES, type AppId, type BasketLine, type Bill, type FeeLine, type Item, type Listing } from '../domain/types.ts';
-import type { FeeMemory } from './fee-memory.ts';
+import { AdapterError, APP_NAMES, type AppId, type BasketLine, type Item, type Listing } from '../domain/types.ts';
 import { fillQuantity, type FillResult } from './pack-filler.ts';
 
-export type CartDecision = 'replace' | 'estimate';
+/** Within this many rupees the ignored handling fees (~₹4–12) could swing it, so call it a tie. */
+export const TIE_RUPEES = 15;
 
 export interface CompareInput {
   basket: BasketLine[];
   catalogue: Map<string, Item>;
   adapters: PlatformAdapter[];
-  feeMemory: FeeMemory;
-  /** Keshav's answer when a real cart (Instamart, BigBasket) wasn't empty. */
-  cartDecisions?: Partial<Record<AppId, CartDecision>>;
-  now?: Date;
 }
-
-export type AppStatus =
-  | 'real' // all-in total read from the app
-  | 'estimated' // items + fee lines from the last real bill
-  | 'fees-unknown' // items only; no earlier bill to borrow fees from
-  | 'needs-cart-decision' // real cart not empty; ask Keshav before touching it
-  | 'couldnt-check';
 
 export interface LineResult {
   itemId: string;
   fill: FillResult;
 }
 
-export type Handoff =
-  | { kind: 'cart' } // basket left in Keshav's real cart
-  | { kind: 'pick-list'; lines: string[] }
-  | { kind: 'none' };
+export type AppResult =
+  | { app: AppId; status: 'checked'; lines: LineResult[]; missingItemIds: string[]; basketPrice: number; pickList: string[] }
+  | { app: AppId; status: 'couldnt-check'; reason: string };
 
-export interface AppResult {
-  app: AppId;
-  status: AppStatus;
-  reason?: string;
-  lines: LineResult[];
-  missingItemIds: string[];
-  itemsTotal?: number;
-  fees: FeeLine[];
-  autoDiscounts: FeeLine[];
-  total?: number;
-  feesAsOf?: Date;
-  coupons: string[];
-  handoff: Handoff;
-}
+type Checked = Extract<AppResult, { status: 'checked' }>;
 
 export interface Verdict {
   app: AppId;
-  total: number;
-  estimated: boolean;
-  runnerUp?: { app: AppId; total: number; estimated: boolean; gap: number };
-  /** Set when no app had every Item; the verdict compares incomplete baskets. */
+  basketPrice: number;
+  runnerUp?: { app: AppId; basketPrice: number; gap: number };
+  /** Runner-up within TIE_RUPEES. */
+  tie: boolean;
+  /** No app had every Item; the verdict compares the most complete baskets. */
   incomplete: boolean;
 }
 
 export interface Comparison {
-  /** Ranked: comparable apps by total (complete baskets first), then the rest. */
+  /** Checked apps (most complete first, then cheapest), then the ones that couldn't be checked. */
   apps: AppResult[];
   verdict?: Verdict;
   worthKnowing: string[];
   splitNote?: string;
 }
 
-const isPriced = (a: AppResult) => a.total !== undefined && (a.status === 'real' || a.status === 'estimated' || a.status === 'fees-unknown');
-
+/** Compare a basket across apps by item prices only (spec: "Basket price (no fees)"). Read-only on every app. */
 export async function compareBasket(input: CompareInput): Promise<Comparison> {
-  const now = input.now ?? new Date();
   const worthKnowing: string[] = [];
-  const results = await Promise.all(input.adapters.map((adapter) => priceOneApp(adapter, input, now, worthKnowing)));
+  const results = await Promise.all(input.adapters.map((a) => checkOneApp(a, input, worthKnowing)));
 
-  const priced = results.filter(isPriced);
-  const rank = (a: AppResult, b: AppResult) =>
-    a.missingItemIds.length - b.missingItemIds.length || (a.total as number) - (b.total as number);
-  priced.sort(rank);
-  const rest = results.filter((r) => !isPriced(r));
-  const apps = [...priced, ...rest];
+  const checked = results.filter((r): r is Checked => r.status === 'checked');
+  checked.sort((a, b) => a.missingItemIds.length - b.missingItemIds.length || a.basketPrice - b.basketPrice);
+  const apps: AppResult[] = [...checked, ...results.filter((r) => r.status !== 'checked')];
 
   let verdict: Verdict | undefined;
-  if (priced.length > 0) {
-    const fewestMissing = priced[0].missingItemIds.length;
-    const contenders = priced.filter((a) => a.missingItemIds.length === fewestMissing && a.status !== 'fees-unknown');
-    const pool = contenders.length > 0 ? contenders : priced.filter((a) => a.missingItemIds.length === fewestMissing);
-    const [win, second] = pool;
+  if (checked.length > 0) {
+    const fewestMissing = checked[0].missingItemIds.length;
+    const [win, second] = checked.filter((a) => a.missingItemIds.length === fewestMissing);
+    const gap = second ? round2(second.basketPrice - win.basketPrice) : undefined;
     verdict = {
       app: win.app,
-      total: win.total as number,
-      estimated: win.status !== 'real',
+      basketPrice: win.basketPrice,
+      runnerUp: second && { app: second.app, basketPrice: second.basketPrice, gap: gap as number },
+      tie: gap !== undefined && gap <= TIE_RUPEES,
       incomplete: fewestMissing > 0,
-      runnerUp: second && {
-        app: second.app,
-        total: second.total as number,
-        estimated: second.status !== 'real',
-        gap: (second.total as number) - (win.total as number),
-      },
     };
   }
 
-  return { apps, verdict, worthKnowing, splitNote: splitNote(input, priced, verdict) };
+  return { apps, verdict, worthKnowing, splitNote: splitNote(input.basket, checked, verdict) };
 }
 
-async function priceOneApp(adapter: PlatformAdapter, input: CompareInput, now: Date, worthKnowing: string[]): Promise<AppResult> {
+async function checkOneApp(adapter: PlatformAdapter, input: CompareInput, worthKnowing: string[]): Promise<AppResult> {
   const app = adapter.app;
-  const name = APP_NAMES[app];
-  const empty: AppResult = { app, status: 'couldnt-check', lines: [], missingItemIds: [], fees: [], autoDiscounts: [], coupons: [], handoff: { kind: 'none' } };
-
   try {
     const auth = await withOneRetry(() => adapter.authStatus());
-    if (auth.state === 'expired') return { ...empty, reason: 'login expired' };
+    if (auth.state === 'expired') return { app, status: 'couldnt-check', reason: 'login expired' };
 
     const wantedIds = input.basket.flatMap((line) => input.catalogue.get(line.itemId)?.listings[app] ?? []);
     const current = new Map((await withOneRetry(() => adapter.getListings(wantedIds))).map((l) => [l.listingId, l]));
@@ -118,86 +80,33 @@ async function priceOneApp(adapter: PlatformAdapter, input: CompareInput, now: D
       const item = mustGet(input.catalogue, line.itemId);
       const family = (item.listings[app] ?? []).map((id) => current.get(id)).filter((l): l is Listing => !!l);
       const fill = fillQuantity(family, line.quantity, item.pinnedContainer);
-      noteCaveats(name, item, line, family, fill, worthKnowing);
+      noteCaveats(APP_NAMES[app], item, line, family, fill, worthKnowing);
       return { itemId: line.itemId, fill };
     });
-    const missingItemIds = lines.filter((l) => l.fill.kind === 'unavailable').map((l) => l.itemId);
-    const cartLines: CartLine[] = lines.flatMap((l) =>
-      l.fill.kind === 'unavailable' ? [] : l.fill.packs.map((p) => ({ listingId: p.listing.listingId, count: p.count })),
-    );
-    const itemsTotal = sum(lines.map((l) => (l.fill.kind === 'unavailable' ? 0 : l.fill.cost)));
-    const base = { ...empty, lines, missingItemIds, itemsTotal };
-
-    if (adapter.usesRealCart) {
-      const decision = input.cartDecisions?.[app];
-      if (decision !== 'replace' && decision !== 'estimate') {
-        const cartEmpty = await withOneRetry(() => adapter.isCartEmpty());
-        if (!cartEmpty) {
-          return { ...base, status: 'needs-cart-decision', reason: `your ${name} cart isn't empty`, itemsTotal: undefined };
-        }
-      }
-      if (decision === 'estimate') return estimate(base, input.feeMemory, app, lines, `you chose to keep your ${name} cart`);
-    }
-
-    let bill: Bill;
-    try {
-      bill = await withOneRetry(() => adapter.priceCart(cartLines));
-    } catch (e) {
-      // Prices were read; only the bill failed. Fall back to an estimate rather than nothing.
-      return estimate(base, input.feeMemory, app, lines, `couldn't read the bill (${describe(e)})`);
-    }
-    input.feeMemory.record(app, bill, now);
     return {
-      ...base,
-      status: 'real',
-      itemsTotal: sum(bill.lines.map((l) => l.amount)),
-      fees: bill.fees,
-      autoDiscounts: bill.autoDiscounts,
-      total: bill.toPay,
-      coupons: bill.coupons,
-      handoff: adapter.usesRealCart ? { kind: 'cart' } : pickList(lines),
+      app,
+      status: 'checked',
+      lines,
+      missingItemIds: lines.filter((l) => l.fill.kind === 'unavailable').map((l) => l.itemId),
+      basketPrice: round2(sum(lines.map((l) => (l.fill.kind === 'unavailable' ? 0 : l.fill.cost)))),
+      pickList: lines.flatMap((l) =>
+        l.fill.kind === 'unavailable' ? [] : l.fill.packs.map((p) => `${p.listing.name} · ${p.listing.size} × ${p.count}`),
+      ),
     };
   } catch (e) {
-    return { ...empty, reason: describe(e) };
+    return { app, status: 'couldnt-check', reason: describe(e) };
   }
-}
-
-function estimate(base: AppResult, memory: FeeMemory, app: AppId, lines: LineResult[], why: string): AppResult {
-  const remembered = memory.get(app);
-  const itemsTotal = base.itemsTotal as number;
-  if (!remembered) {
-    return { ...base, status: 'fees-unknown', reason: `${why}; fees unknown`, total: itemsTotal, handoff: pickList(lines) };
-  }
-  return {
-    ...base,
-    status: 'estimated',
-    reason: why,
-    fees: remembered.fees,
-    total: itemsTotal + sum(remembered.fees.map((f) => f.amount)),
-    feesAsOf: remembered.seenAt,
-    handoff: pickList(lines),
-  };
-}
-
-function pickList(lines: LineResult[]): Handoff {
-  return {
-    kind: 'pick-list',
-    lines: lines.flatMap((l) =>
-      l.fill.kind === 'unavailable' ? [] : l.fill.packs.map((p) => `${p.listing.name} · ${p.listing.size} × ${p.count}`),
-    ),
-  };
 }
 
 function noteCaveats(appName: string, item: Item, line: BasketLine, family: Listing[], fill: FillResult, out: string[]): void {
   if (fill.kind === 'unavailable') {
-    if (fill.reason === 'out-of-stock') out.push(`${item.name}: out of stock on ${appName}`);
-    else out.push(`${item.name}: not sold on ${appName}`);
+    out.push(`${item.name}: ${fill.reason === 'out-of-stock' ? 'out of stock' : 'not sold'} on ${appName}`);
     return;
   }
   if (fill.kind === 'closest') {
     const factor = fill.amount / line.quantity.amount;
     out.push(
-      `${item.name} on ${appName}: closest pack is ${fill.packs[0].listing.size} — ${factor >= 1 ? `${round1(factor)}× what you wanted` : `less than you wanted`} (₹${Math.round(fill.perKg)}/kg·L)`,
+      `${item.name} on ${appName}: closest pack is ${fill.packs[0].listing.size} — ${factor >= 1 ? `${round1(factor)}× what you wanted` : 'less than you wanted'} (₹${Math.round(fill.perKg)}/kg·L)`,
     );
   }
   // A cheaper-per-unit confirmed pack that's out of stock (e.g. the pouch) explains why a different container won.
@@ -211,25 +120,24 @@ function noteCaveats(appName: string, item: Item, line: BasketLine, family: List
   if (fill.mixedUnits) out.push(`${item.name} on ${appName}: compared ml with g (${formatQuantity(line.quantity)} wanted)`);
 }
 
-function splitNote(input: CompareInput, priced: AppResult[], verdict: Verdict | undefined): string | undefined {
+function splitNote(basket: BasketLine[], checked: Checked[], verdict: Verdict | undefined): string | undefined {
   if (!verdict || verdict.incomplete) return undefined;
-  const usable = priced.filter((a) => a.status !== 'fees-unknown');
-  const cheapestPerLine = input.basket.map((line) => {
-    let best: { app: AppResult; cost: number } | undefined;
-    for (const a of usable) {
+  const cheapestPerLine = basket.map((line) => {
+    let best: { app: Checked; cost: number } | undefined;
+    for (const a of checked) {
       const fill = a.lines.find((l) => l.itemId === line.itemId)?.fill;
       if (fill && fill.kind !== 'unavailable' && (!best || fill.cost < best.cost)) best = { app: a, cost: fill.cost };
     }
     return best;
   });
   if (cheapestPerLine.some((b) => !b)) return undefined;
-  const inSplit = new Set(cheapestPerLine.map((b) => (b as { app: AppResult }).app));
-  const used = usable.filter((a) => inSplit.has(a)); // ranking order
+  const inSplit = new Set(cheapestPerLine.map((b) => (b as { app: Checked }).app));
+  const used = checked.filter((a) => inSplit.has(a)); // ranking order
   if (used.length < 2) return undefined;
-  const splitTotal = sum(cheapestPerLine.map((b) => (b as { cost: number }).cost)) + sum(used.map((a) => sum(a.fees.map((f) => f.amount))));
-  const saving = verdict.total - splitTotal;
+  const splitPrice = round2(sum(cheapestPerLine.map((b) => (b as { cost: number }).cost)));
+  const saving = round2(verdict.basketPrice - splitPrice);
   if (saving <= 0) return undefined;
-  return `Splitting across ${used.map((a) => APP_NAMES[a.app]).join(' + ')} would cost ₹${round2(splitTotal)} — ₹${round2(saving)} less than ${APP_NAMES[verdict.app]} alone, for ${used.length} deliveries.`;
+  return `Splitting across ${used.map((a) => APP_NAMES[a.app]).join(' + ')} would cost ₹${splitPrice} — ₹${saving} less than ${APP_NAMES[verdict.app]} alone, for ${used.length} deliveries.`;
 }
 
 /** One gentle retry for blocks/blanks/rate limits (spec: request governor). Login expiry is not retried. */

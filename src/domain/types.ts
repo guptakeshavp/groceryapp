@@ -47,22 +47,6 @@ export interface BasketLine {
   quantity: Quantity;
 }
 
-export interface FeeLine {
-  label: string;
-  amount: number;
-}
-
-/** A real bill read from an app's cart or order preview. */
-export interface Bill {
-  lines: { listingId: string; count: number; amount: number }[];
-  fees: FeeLine[];
-  /** Discounts the cart applies by itself (membership waivers, automatic offers). Positive numbers. */
-  autoDiscounts: FeeLine[];
-  toPay: number;
-  /** Coupons the app revealed; listed, never counted. */
-  coupons: string[];
-}
-
 export type AuthStatus =
   | { state: 'ok'; expiresAt?: Date }
   | { state: 'expired' };
